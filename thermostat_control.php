@@ -2,13 +2,23 @@
 
 date_default_timezone_set('America/Los_Angeles');
 
+# number of GPIO pin on Raspberry Pi
 $gpio_channel = 7;
 
+# Hour and minute when our 'morning' starts and thermostat should be ON
+$daytime_start_hours = 8;
+$daytime_start_minutes = 0;
+
+# Duration of 'daytime' period in hours and minutes
+$daytime_period_hours = 17;
+$daytime_period_minutes = 0;
+
 $currentTime = new DateTime('NOW');
-$mydate_begin = new DateTime('NOW');;
-$mydate_begin->setTime(8, 00);
-$mydate_end = new DateTime('NOW');;
-$mydate_end->add(new DateInterval('PT17H'));
+$mydate_begin = new DateTime('NOW');
+$mydate_begin->setTime($daytime_start_hours, $daytime_start_minutes);
+$mydate_end = new DateTime('NOW');
+$mydate_end->setTime($daytime_start_hours, $daytime_start_minutes);
+$mydate_end->add(new DateInterval('PT'.($daytime_period_hours * 60 + $daytime_period_minutes).'M'));
 
 echo "DateTime (begin): ".$mydate_begin->format('Y-m-d H:i:s')."\n";
 echo "DateTime (end)  : ".$mydate_end->format('Y-m-d H:i:s')."\n";
