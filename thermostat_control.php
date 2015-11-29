@@ -2,7 +2,7 @@
 
 date_default_timezone_set('America/Los_Angeles');
 
-$testmode = 1;
+$testmode = 0;
 
 # number of GPIO pin on Raspberry Pi
 $gpio_channel = 7;
