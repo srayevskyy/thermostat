@@ -5,7 +5,7 @@ date_default_timezone_set('America/Los_Angeles');
 $testmode = 1;
 
 # number of GPIO pin on Raspberry Pi
-$gpio_channel = 7;
+$gpio_channel = 8;
 
 # Hour and minute when our 'morning' starts and thermostat should be ON
 $daytime_start_hours = 8;
@@ -35,7 +35,7 @@ if (($currentTime > $mydate_begin) && ($currentTime < $mydate_end)) {
 
     echo "Thermostat should be ON\n";
     if ($testmode == 0) {
-    	$gpio_on = shell_exec("/usr/local/bin/gpio -g write ".$gpio_channel." 0"); 
+    	$gpio_on = shell_exec("/usr/local/bin/gpio -g write ".$gpio_channel." 1"); 
     }
 }
     elseif (($currentTime < $mydate_begin) && ($currentTime->format('H:i') < $mydate_end->format('H:i'))) {
@@ -47,7 +47,7 @@ if (($currentTime > $mydate_begin) && ($currentTime < $mydate_end)) {
 else {
     echo "Should be OFF\n";
     if ($testmode == 0) {
-        $gpio_off = shell_exec("/usr/local/bin/gpio -g write ".$gpio_channel." 1");
+        $gpio_off = shell_exec("/usr/local/bin/gpio -g write ".$gpio_channel." 0");
     }
 }
 

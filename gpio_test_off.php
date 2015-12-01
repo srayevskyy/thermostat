@@ -1,10 +1,10 @@
 <?php
 
-$gpio_channel = 7;
+$gpio_channel = 8;
 
 $setmode_channel = shell_exec("/usr/local/bin/gpio -g mode ".$gpio_channel." out");
 
-$gpio_off = shell_exec("/usr/local/bin/gpio -g write ".$gpio_channel." 1");
+$gpio_off = shell_exec("/usr/local/bin/gpio -g write ".$gpio_channel." 0");
 
 echo "Done!\n";
 
