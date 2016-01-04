@@ -16,18 +16,21 @@ $daytime_duration_hours = 17;
 $daytime_duration_minutes = 0;
 
 $currentTime = new DateTime('NOW');
-$mydate_begin = new DateTime('NOW');
+$mydate_begin = new DateTime($currentTime->format('Y-m-d H:i:s'));
 $mydate_begin->setTime($daytime_start_hours, $daytime_start_minutes);
-$mydate_end = new DateTime('NOW');
+$mydate_end = new DateTime($currentTime->format('Y-m-d H:i:s'));
 $mydate_end->setTime($daytime_start_hours, $daytime_start_minutes);
 $mydate_end->add(new DateInterval('PT'.($daytime_duration_hours * 60 + $daytime_duration_minutes).'M'));
 
+# debugging output
 echo "DateTime (begin): ".$mydate_begin->format('Y-m-d H:i:s')."\n";
 echo "DateTime (end)  : ".$mydate_end->format('Y-m-d H:i:s')."\n";
 echo "Current time    : ".$currentTime->format('Y-m-d H:i:s')."\n";
 
+# assigning default value to decision - "off"
 $decision = "off";
 
+# comparison that should change decision to "on" in case current timestamp is within designed time frame
 if (($currentTime > $mydate_begin) && ($currentTime < $mydate_end)) {
     $decision = "on";
 }
