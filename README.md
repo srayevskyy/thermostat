@@ -36,7 +36,8 @@ cd thermostat
 ```* * * * * /usr/bin/php /home/pi/thermostat/thermostat_control.ph```
 
 ## Adding a hardware clock to Raspberry Pi (DS3231)
-
+#### install i2c-tools package
+sudo apt-get install -y i2c-tools
 #### list devices on i2c bus (use -0 for Model A or -1 for Model B)
 ```sudo i2cdetect -y 0```
 Comment out the blacklist entry so the module can be loaded on boot 
