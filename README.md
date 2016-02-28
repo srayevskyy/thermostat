@@ -55,10 +55,10 @@ You should see a response with what the chip thinks is the date.
 ```sudo hwclock -w```
 #### Next, to read the time from the RTC chip and set the system time from it at every boot, open /etc/rc.local and add these two lines above the exit 0 line:
 ```
-echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device # for raspberry pi model b
+echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device # for raspberry pi model b
 # or
-echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device # for raspberry pi zero
-hwclock -s
+echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device # for raspberry pi zero
+/sbin/hwclock  -s
 ```
 #### We can also disable the ntp daemon and fake-hwclock during boot
 ```
