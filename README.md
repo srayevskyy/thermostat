@@ -28,7 +28,7 @@ cd thermostat
 ```crontab -e```
 
 #### add the following entry to users crontab
-```* * * * * /usr/bin/php /home/pi/thermostat/thermostat_control.ph```
+```* * * * * /usr/bin/php /home/pi/thermostat/thermostat_control.php```
 
 ## Adding a hardware clock to Raspberry Pi (DS3231)
 #### list devices on i2c bus
