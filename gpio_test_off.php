@@ -1,6 +1,6 @@
 <?php
 
-$gpio_channel = 8;
+$gpio_channel = 21;
 
 $setmode_channel = shell_exec("/usr/local/bin/gpio -g mode ".$gpio_channel." out");
 

@@ -5,7 +5,7 @@ date_default_timezone_set('America/Los_Angeles');
 $testmode = 0;
 
 # number of GPIO pin on Raspberry Pi
-$gpio_channel = 8;
+$gpio_channel = 21;
 
 # Time (Hour and minute) when thermostat circuit should be ON
 $daytime_start_hours = 8;
