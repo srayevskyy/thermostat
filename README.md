@@ -47,6 +47,7 @@ echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device # for raspbe
 ```
 #### Test whether Linux can see our RTC module.
 ```sudo hwclock```
+
 You should see a response with what the chip thinks is the date.
 #### Set system date
 ```sudo date -s "Sep 27 2014 12:46:00"```
