@@ -32,8 +32,10 @@ cd thermostat
 
 ## Adding a hardware clock to Raspberry Pi (DS3231)
 #### list devices on i2c bus
-```sudo i2cdetect -y 0 #for Raspberry Pi Model B```
-```sudo i2cdetect -y 1 #for Raspberry Pi Zero```
+```
+sudo i2cdetect -y 0 #for Raspberry Pi Model B
+sudo i2cdetect -y 1 #for Raspberry Pi Zero
+```
 #### Comment out the blacklist entry so the module can be loaded on boot 
 ```sudo sed -i 's/blacklist i2c-bcm2708/#blacklist i2c-bcm2708/' /etc/modprobe.d/raspi-blacklist.conf```
 #### Load the module now
