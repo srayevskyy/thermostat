@@ -2,6 +2,10 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Initial setup
 
+#### Install Raspbian Jessie from https://www.raspberrypi.org/downloads/raspbian
+
+#### Install pre-requisites
+
 ```sudo apt-get install php5 git i2c-tools```
 
 #### get supplementary library wiringPI
