@@ -1,8 +1,8 @@
 This is a project to override control of a home thermostat with Raspbery Pi.
 
-Initial setup hints:
+#### Initial setup
 
-sudo apt-get install php5 git i2c-tools
+```sudo apt-get install php5 git i2c-tools```
 
 #### get supplementary library wiringPI
 
@@ -12,9 +12,6 @@ git clone git://git.drogon.net/wiringPi
 cd wiringPi
 ./build
 ```
-
-#### install php
-```sudo apt-get install php5```
 
 #### clone thermostat control project
 
@@ -34,8 +31,6 @@ cd thermostat
 ```* * * * * /usr/bin/php /home/pi/thermostat/thermostat_control.ph```
 
 ## Adding a hardware clock to Raspberry Pi (DS3231)
-#### install i2c-tools package
-```sudo apt-get install -y i2c-tools```
 #### list devices on i2c bus (use -0 for Model A or -1 for Model B)
 ```sudo i2cdetect -y 0```
 Comment out the blacklist entry so the module can be loaded on boot 
