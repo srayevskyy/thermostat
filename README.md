@@ -38,7 +38,7 @@ sudo i2cdetect -y 1 #for Raspberry Pi Zero
 ```
 #### Comment out the blacklist entry so the module can be loaded on boot 
 ```sudo sed -i 's/blacklist i2c-bcm2708/#blacklist i2c-bcm2708/' /etc/modprobe.d/raspi-blacklist.conf```
-#### Load the module now
+#### Load the kernel module
 ```sudo modprobe i2c-bcm2708```
 #### Notify Linux of the Dallas RTC device (use -0 for Model A or -1 for Model B)
 ```
@@ -48,7 +48,7 @@ echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device # for raspbe
 #### Test whether Linux can see our RTC module.
 ```sudo hwclock```
 
-You should see a response with what the chip thinks is the date.
+Output: a response with datetime extracted from RTC chip.
 #### Set system date
 ```sudo date -s "Sep 27 2014 12:46:00"```
 #### Transfer the system date to the chip:
