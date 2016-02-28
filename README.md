@@ -13,6 +13,11 @@ cd wiringPi
 ./build
 ```
 
+#### install php
+```
+sudo apt-get install php5
+```
+
 #### clone thermostat control project
 
 ```
