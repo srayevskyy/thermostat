@@ -16,7 +16,6 @@ from PIL import ImageDraw, ImageFont
 oled_port = 1
 oled_address = 0x3C
 thermostat_relay_gpio_channel = 21
-decision = "off"
 
 # Time (Hour and minute) when thermostat circuit should be ON
 daytime_start_hours = 8
@@ -49,9 +48,21 @@ def network(iface):
            (iface, bytes2human(stat.bytes_sent), bytes2human(stat.bytes_recv))
 
 def make_decision(oled):
+    # set default value
+    decision = "off"
+    # get current time
+    ct = datetime.datetime.now()
+    # construct 'interval'
+    delta = datetime.timedelta(hours = daytime_duration_hours, minutes = daytime_duration_minutes)
+    # derive today's and yesterday's start times
+    dt_begin_today = datetime.datetime(ct.year, ct.month, ct.day, daytime_start_hours, daytime_start_minutes, 0)
+    dt_begin_yesterday = datetime.datetime(ct.year, ct.month, ct.day, daytime_start_hours, daytime_start_minutes, 0) - datetime.timedelta(days=1)
+    # derive today's and yesterday's end times
+    dt_end_today = dt_begin_today + delta
+    dt_end_yesterday = dt_begin_yesterday + delta
 
-    # TBD: need to make a decision - on or off
-    current_time = datetime.datetime.now()
+    if ((ct >= dt_begin_today) and (ct <= dt_end_today)) or ((ct >= dt_begin_yesterday) and (ct <= dt_end_yesterday)):
+        decision = "on"
 
     # refresh data on device display
     font = ImageFont.load_default()
@@ -59,14 +70,8 @@ def make_decision(oled):
     font3 = ImageFont.truetype('fonts/red_alert.ttf', 20)
     with canvas(oled) as draw:
         draw.text((0, 0), decision.upper(), font=font3, fill=255)
-        draw.text((0, 18), current_time.strftime('LAST: %y/%m/%d %H:%M'), font=font2, fill=255)
-        draw.text(
-          (0, 32)
-          , 'When ON: ' + ("0" + str(daytime_start_hours))[:2] + ':' + ("0" + str(daytime_start_minutes))[:2] + ' ('
-            + ("0" + str(daytime_duration_hours))[:2] + ':' + ("0" + str(daytime_duration_minutes))[:2]
-            + ')'
-          , font=font2, fill=255
-        )
+        draw.text((0, 18), ct.strftime('LAST: %y/%m/%d %H:%M'), font=font2, fill=255)
+        draw.text((0, 32), 'When ON: ' + dt_begin_today.strftime('%H:%M') + ' - ' + dt_end_today.strftime('%H:%M'), font=font2, fill=255)
         draw.text((0, 46), network('wlan0'), font=font2, fill=255)
 
     # send the command to relay
