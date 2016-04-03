@@ -59,10 +59,10 @@ def make_decision(oled):
     font3 = ImageFont.truetype('fonts/red_alert.ttf', 20)
     with canvas(oled) as draw:
         draw.text((0, 0), decision.upper(), font=font3, fill=255)
-        draw.text((0, 18), current_time.strftime('%Y-%m-%d %H:%M:%S'), font=font2, fill=255)
+        draw.text((0, 18), current_time.strftime('LAST: %y/%m/%d %H:%M'), font=font2, fill=255)
         draw.text(
           (0, 32)
-          , ("0" + str(daytime_start_hours))[:2] + ':' + ("0" + str(daytime_start_minutes))[:2] + ' ``('
+          , 'When ON: ' + ("0" + str(daytime_start_hours))[:2] + ':' + ("0" + str(daytime_start_minutes))[:2] + ' ('
             + ("0" + str(daytime_duration_hours))[:2] + ':' + ("0" + str(daytime_duration_minutes))[:2]
             + ')'
           , font=font2, fill=255
