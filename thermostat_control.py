@@ -43,20 +43,27 @@ def make_decision(oled):
     dt_end_today = dt_begin_today + delta
     dt_end_yesterday = dt_begin_yesterday + delta
 
+    # the most important part - here a decision to turn on thermostat is made
     if ((ct >= dt_begin_today) and (ct <= dt_end_today)) or ((ct >= dt_begin_yesterday) and (ct <= dt_end_yesterday)):
         decision = "on"
 
-    # refresh data on device display
+    # initialize fonts for render on the screen
     font = ImageFont.load_default()
     font2 = ImageFont.truetype('fonts/red_alert.ttf', 14)
     font3 = ImageFont.truetype('fonts/red_alert.ttf', 20)
+
+    # display status information on the screen
     with canvas(oled) as draw:
+        # display current decision (ON or OFF)
         draw.text((0, 0), decision.upper(), font=font3, fill=255)
+        # display last time when thermostat control script was executed
         draw.text((0, 18), ct.strftime('LAST: %y/%m/%d %H:%M'), font=font2, fill=255)
+        # show time interval when thermostat should be ON
         draw.text((0, 32), 'When ON: ' + dt_begin_today.strftime('%H:%M') + ' - ' + dt_end_today.strftime('%H:%M'), font=font2, fill=255)
+        # show IP address of wifi adapter
         draw.text((0, 46), "IP: " + get_ip_address('wlan0'), font=font2, fill=255)
 
-    # send the command to relay
+    # send the command to relay using GPIO pins on raspberry
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(thermostat_relay_gpio_channel, GPIO.OUT)
