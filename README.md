@@ -9,15 +9,17 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Install pre-requisites
 
-`sudo apt-get install php5 git i2c-tools`
+`sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip`
+`sudo pip install pillow`
+`sudo pip install psutil`
 
-#### get supplementary library wiringPI
+#### get supplementary library ssd1306
 
 ```
 cd ~
-git clone git://git.drogon.net/wiringPi
-cd wiringPi
-./build
+git clone https://github.com/rm-hull/ssd1306
+cd ~/ssd1306
+sudo python setup.py install
 ```
 
 #### clone thermostat control project
@@ -35,7 +37,7 @@ cd thermostat
 `crontab -e`
 
 #### add the following entry to users crontab
-`* * * * * /usr/bin/php /home/pi/thermostat/thermostat_control.php`
+`* * * * * /usr/bin/php /home/pi/thermostat/thermostat_control.py`
 
 ## Adding a hardware clock (Dallas DS3231) to Raspberry Pi
 #### list devices on i2c bus
