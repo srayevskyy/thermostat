@@ -24,24 +24,26 @@ class KY040:
         GPIO.setup(switchPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def start(self):
-        GPIO.add_event_detect(self.clockPin, GPIO.FALLING, callback=self._clockCallback, bouncetime=250)
-        GPIO.add_event_detect(self.switchPin, GPIO.FALLING, callback=self._switchCallback, bouncetime=300)
+        GPIO.add_event_detect(self.clockPin, GPIO.BOTH, callback=self._clockCallback, bouncetime=80)
+        GPIO.add_event_detect(self.switchPin, GPIO.BOTH, callback=self._switchCallback, bouncetime=100)
 
     def stop(self):
         GPIO.remove_event_detect(self.clockPin)
         GPIO.remove_event_detect(self.switchPin)
 
     def _clockCallback(self, pin):
-        if GPIO.input(self.clockPin) == 0:
-            data = GPIO.input(self.dataPin)
+        data_clock = GPIO.input(self.clockPin)
+        data = GPIO.input(self.dataPin)
+	print data_clock, data
+	#TBD: Gray code needs to be implemented
+        if data_clock == 0:
             if data == 1:
                 self.rotaryCallback(self.ANTICLOCKWISE)
             else:
                 self.rotaryCallback(self.CLOCKWISE)
 
     def _switchCallback(self, pin):
-        if GPIO.input(self.switchPin) == 0:
-            self.switchCallback()
+        self.switchCallback(GPIO.input(self.switchPin))
 
 #test
 if __name__ == "__main__":
@@ -53,12 +55,12 @@ if __name__ == "__main__":
     def rotaryChange(direction):
         print "turned - " + str(direction)
 
-    def switchPressed():
-        print "button pressed"
+    def switchEvent(state):
+        print "button event: ", state
 
     GPIO.setmode(GPIO.BCM)
 
-    ky040 = KY040(CLOCKPIN, DATAPIN, SWITCHPIN, rotaryChange, switchPressed)
+    ky040 = KY040(CLOCKPIN, DATAPIN, SWITCHPIN, rotaryChange, switchEvent)
 
     ky040.start()
 
