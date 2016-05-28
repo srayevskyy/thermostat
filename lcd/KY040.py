@@ -3,7 +3,8 @@
 #stuffaboutcode.com
 
 import RPi.GPIO as GPIO
-from time import sleep
+import lcddriver
+from time import *
 
 class KY040:
 
@@ -34,8 +35,8 @@ class KY040:
     def _clockCallback(self, pin):
         data_clock = GPIO.input(self.clockPin)
         data = GPIO.input(self.dataPin)
-	print data_clock, data
-	#TBD: Gray code needs to be implemented
+        #print data_clock, data
+        #TBD: Gray code needs to be implemented
         if data_clock == 0:
             if data == 1:
                 self.rotaryCallback(self.ANTICLOCKWISE)
@@ -52,11 +53,16 @@ if __name__ == "__main__":
     DATAPIN = 6
     SWITCHPIN = 13
 
+#    global lcd
+    lcd = lcddriver.lcd()
+
     def rotaryChange(direction):
         print "turned - " + str(direction)
+        lcd.lcd_display_string("turned - " + str(direction), 1)
 
     def switchEvent(state):
         print "button event: ", state
+        lcd.lcd_display_string("button event: " + str(state), 2)
 
     GPIO.setmode(GPIO.BCM)
 
