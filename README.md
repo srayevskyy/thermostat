@@ -11,10 +11,10 @@ sudo dpkg-reconfigure openssh-server
 ```
 #### Pet up passwordless ssh
 
-# on the Raspberry
+##### on the Raspberry
 `cd ~ && mkdir .ssh && chmod 700 ~/.ssh`
 
-# from your computer
+##### from your computer
 `cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys'`
 
 #### Change timezone
