@@ -2,16 +2,23 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Initial setup
 
-#### Install Raspbian Jessie from https://www.raspberrypi.org/downloads/raspbian
+#### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
+
+#### Regenerate ssh keys
+```
+sudo rm -fv /etc/ssh/ssh_host_*
+sudo dpkg-reconfigure openssh-server
+```
 
 #### Change timezone
 `sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime`
 
 #### Install pre-requisites
 
-`sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip`
-`sudo pip install pillow`
-`sudo pip install psutil`
+```sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip
+sudo pip install pillow
+sudo pip install psutil
+```
 
 #### get supplementary library ssd1306
 
