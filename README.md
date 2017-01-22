@@ -1,6 +1,6 @@
 This is a project to override control of a home thermostat with Raspbery Pi.
 
-#### Initial setup
+### Initial setup
 
 #### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
 
@@ -9,7 +9,7 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 sudo rm -fv /etc/ssh/ssh_host_*
 sudo dpkg-reconfigure openssh-server
 ```
-#### Pet up passwordless ssh
+#### Set up passwordless ssh
 
 ##### on the Raspberry
 `cd ~ && mkdir .ssh && chmod 700 ~/.ssh`
@@ -28,7 +28,7 @@ sudo pip install pillow
 sudo pip install psutil
 ```
 
-#### get supplementary library ssd1306
+#### Install supplementary library ssd1306 (OLED driver)
 
 ```
 cd ~
@@ -37,7 +37,7 @@ cd ~/ssd1306
 sudo python setup.py install
 ```
 
-#### clone thermostat control project
+#### Clone thermostat control project
 
 ```
 cd ~
@@ -45,7 +45,7 @@ git clone https://github.com/srayevskyy/thermostat
 cd thermostat
 ```
 
-#### check GPIO outputs
+#### Check GPIO pins availability
 `gpio readall`
 
 #### add new entry to root's crontab
@@ -54,7 +54,7 @@ cd thermostat
 #### add the following entry to users crontab
 `* * * * * cd /home/pi/thermostat; /usr/bin/python /home/pi/thermostat/thermostat_control.py`
 
-## Adding a hardware clock (Dallas DS3231) to Raspberry Pi
+### Adding a hardware clock (Dallas DS3231) to Raspberry Pi
 #### list devices on i2c bus
 ```
 sudo i2cdetect -y 0 #for Raspberry Pi Model B
@@ -69,7 +69,7 @@ sudo i2cdetect -y 1 #for Raspberry Pi Zero
 echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-0/new_device # for raspberry pi model b
 echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device # for raspberry pi zero
 ```
-#### Test whether Linux can see our RTC module.
+#### Test whether Linux can see our RTC module
 `sudo hwclock`
 
 Output: a response with datetime extracted from RTC chip.
