@@ -9,13 +9,21 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 sudo rm -fv /etc/ssh/ssh_host_*
 sudo dpkg-reconfigure openssh-server
 ```
+#### Pet up passwordless ssh
+
+# on the Raspberry
+`cd ~ && mkdir .ssh && chmod 700 ~/.ssh`
+
+# from your computer
+`cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys'`
 
 #### Change timezone
 `sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime`
 
 #### Install pre-requisites
 
-```sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip
+```
+sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip
 sudo pip install pillow
 sudo pip install psutil
 ```
