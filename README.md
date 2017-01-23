@@ -44,6 +44,14 @@ cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmo
 
 `sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip`
 
+#### Install supplementary library WiringPi ('gpio' shell command)
+```
+cd ~/src
+git clone https://github.com/WiringPi/WiringPi
+cd ~/src/WiringPi/
+./build
+```
+
 #### Install supplementary library ssd1306 (OLED driver)
 
 ```
