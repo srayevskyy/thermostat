@@ -4,6 +4,18 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
 
+#### Open the wpa-supplicant configuration file in nano
+`sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`
+Go to the bottom of the file and add the following: 
+```
+network={
+    ssid="your_wifi_ssid"
+    psk="Your_wifi_password"
+}
+```
+Bounce wifi adapter:
+`sudo ifdown wlan0; sudo ifup wlan0; inet addr`
+
 #### Regenerate ssh keys
 ```
 sudo rm -fv /etc/ssh/ssh_host_*
