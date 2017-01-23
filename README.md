@@ -5,7 +5,9 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 #### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
 
 #### pre-configure steps with raspi-config
-`sudo raspi-config`
+```
+sudo raspi-config
+```
 In the program:
 - change user password
 - set host name
