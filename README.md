@@ -48,11 +48,11 @@ cd thermostat
 #### Check GPIO pins availability
 `gpio readall`
 
-#### add new entry to root's crontab
-`sudo crontab -e`
+#### add new entry to user's crontab
+`crontab -e`
 
 #### add the following entry to users crontab
-`* * * * * cd /home/pi/thermostat; /usr/bin/python /home/pi/thermostat/thermostat_control/thermostat_control.py`
+`* * * * * /home/pi/thermostat/thermostat_control/thermostat_control_runner.sh`
 
 ### Adding a hardware clock (Dallas DS3231) to Raspberry Pi
 #### list devices on i2c bus
