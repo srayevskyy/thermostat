@@ -57,6 +57,8 @@ cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmo
 sudo apt-get update && sudo apt-get -y upgrade
 sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip
 ```
+#### Create directory for source code
+`mkdir ~/src`
 
 #### Install supplementary library WiringPi ('gpio' shell command)
 ```
