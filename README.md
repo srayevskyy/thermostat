@@ -4,6 +4,17 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
 
+#### pre-configure steps with raspi-config
+```
+sudo raspi-config
+```
+In the program:
+- change user password
+- set host name
+- set memory split
+- set 'US' keyboard layout
+- expand filesystem
+
 #### Open the wpa-supplicant configuration file in nano
 ```
 sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
@@ -43,10 +54,21 @@ cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmo
 #### Install pre-requisites
 
 ```
+sudo apt-get update && sudo apt-get -y upgrade
 sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip
-sudo pip install pillow
-sudo pip install psutil
 ```
+#### Create directory for source code
+`mkdir ~/src`
+
+#### Install supplementary library WiringPi ('gpio' shell command)
+```
+cd ~/src
+git clone https://github.com/WiringPi/WiringPi
+cd ~/src/WiringPi/
+./build
+```
+#### Check GPIO pins availability
+`gpio readall`
 
 #### Install supplementary library ssd1306 (OLED driver)
 
@@ -62,17 +84,23 @@ sudo python setup.py install
 ```
 cd ~/src
 git clone https://github.com/srayevskyy/thermostat
-cd ~/src/thermostat
 ```
 
-#### Check GPIO pins availability
-`gpio readall`
+#### Install pip dependencies
+```
+cd ~/src/thermostat
+sudo pip install -U setuptools
+sudo pip install -r requirements.txt 
+```
 
 #### add new entry to user's crontab
 `crontab -e`
 
 #### add the following entry to users crontab
-`* * * * * /home/pi/thermostat/thermostat_control/thermostat_control_runner.sh`
+##### For thermostat control
+`* * * * * /home/pi/src/thermostat/thermostat_control/thermostat_control_runner.sh`
+##### For smart outlet
+`* * * * * /home/pi/src/thermostat/smart_outlet_control/smart_outlet_runner.sh`
 
 ### Adding a hardware clock (Dallas DS3231) to Raspberry Pi
 #### list devices on i2c bus
