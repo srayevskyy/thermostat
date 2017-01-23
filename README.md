@@ -42,11 +42,7 @@ cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmo
 
 #### Install pre-requisites
 
-```
-sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip
-sudo pip install pillow
-sudo pip install psutil
-```
+`sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip`
 
 #### Install supplementary library ssd1306 (OLED driver)
 
@@ -62,7 +58,12 @@ sudo python setup.py install
 ```
 cd ~/src
 git clone https://github.com/srayevskyy/thermostat
+```
+
+#### Install pip dependencies
+```
 cd ~/src/thermostat
+sudo pip install -r requirements.txt 
 ```
 
 #### Check GPIO pins availability
