@@ -52,7 +52,7 @@ cd thermostat
 `sudo crontab -e`
 
 #### add the following entry to users crontab
-`* * * * * cd /home/pi/thermostat; /usr/bin/python /home/pi/thermostat/thermostat_control.py`
+`* * * * * cd /home/pi/thermostat; /usr/bin/python /home/pi/thermostat/thermostat_control/thermostat_control.py`
 
 ### Adding a hardware clock (Dallas DS3231) to Raspberry Pi
 #### list devices on i2c bus
