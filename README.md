@@ -43,7 +43,7 @@ cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmo
 #### Install pre-requisites
 
 ```
-sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip
+sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip
 sudo pip install pillow
 sudo pip install psutil
 ```
