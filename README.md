@@ -58,13 +58,12 @@ sudo python setup.py install
 ```
 cd ~/src
 git clone https://github.com/srayevskyy/thermostat
-sudo pip install -U setuptools
-sudo pip install -r requirements.txt
 ```
 
 #### Install pip dependencies
 ```
 cd ~/src/thermostat
+sudo pip install -U setuptools
 sudo pip install -r requirements.txt 
 ```
 
