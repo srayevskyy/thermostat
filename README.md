@@ -4,6 +4,22 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
 
+#### Open the wpa-supplicant configuration file in nano
+```
+sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+```
+Go to the bottom of the file and add the following: 
+```
+network={
+    ssid="your_wifi_ssid"
+    psk="Your_wifi_password"
+}
+```
+Bounce wifi adapter:
+```
+sudo ifdown wlan0; sudo ifup wlan0; inet addr
+```
+
 #### Regenerate ssh keys
 ```
 sudo rm -fv /etc/ssh/ssh_host_*
@@ -11,11 +27,15 @@ sudo dpkg-reconfigure openssh-server
 ```
 #### Set up passwordless ssh
 
-##### on the Raspberry
-`cd ~ && mkdir .ssh && chmod 700 ~/.ssh`
-
-##### from your computer
-`cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys'`
+Create ssh keys directory
+```
+cd ~ && mkdir .ssh && chmod 700 ~/.ssh
+```
+Transfer your public key to Raspberr Pi.
+NOTE: Run this from your computer
+```
+cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys'
+```
 
 #### Change timezone
 `sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime`
@@ -23,7 +43,7 @@ sudo dpkg-reconfigure openssh-server
 #### Install pre-requisites
 
 ```
-sudo apt-get install -y i2c-tools libjpeg-dev python-dev python-smbus python-pip
+sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip
 sudo pip install pillow
 sudo pip install psutil
 ```
@@ -31,18 +51,18 @@ sudo pip install psutil
 #### Install supplementary library ssd1306 (OLED driver)
 
 ```
-cd ~
+cd ~/src
 git clone https://github.com/rm-hull/ssd1306
-cd ~/ssd1306
+cd ~/src/ssd1306
 sudo python setup.py install
 ```
 
 #### Clone thermostat control project
 
 ```
-cd ~
+cd ~/src
 git clone https://github.com/srayevskyy/thermostat
-cd thermostat
+cd ~/src/thermostat
 ```
 
 #### Check GPIO pins availability
