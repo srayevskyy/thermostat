@@ -49,8 +49,8 @@ def make_decision(oled):
 
     # initialize fonts for render on the screen
     font = ImageFont.load_default()
-    font2 = ImageFont.truetype('fonts/red_alert.ttf', 14)
-    font3 = ImageFont.truetype('fonts/red_alert.ttf', 20)
+    font2 = ImageFont.truetype('../fonts/red_alert.ttf', 14)
+    font3 = ImageFont.truetype('../fonts/red_alert.ttf', 20)
 
     # display status information on the screen
     with canvas(oled) as draw:
