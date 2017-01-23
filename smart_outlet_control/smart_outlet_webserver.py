@@ -24,7 +24,7 @@ class device_handler(debounce_handler):
  
     def act(self, client_address, state, name):
         print "State", state, "from client @", client_address, "name: '", name, "'"
-        GPIO.setmode(GPIO.BOARD) ## Use board pin numbering
+        GPIO.setmode(GPIO.BCM) ## Use BCM pin numbering
         GPIO.setup(int(sys.argv[3]), GPIO.OUT)   ## Setup GPIO Pin to OUTPUT
         GPIO.output(int(sys.argv[3]), not state) ## State is true/false
         return True
