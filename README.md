@@ -51,6 +51,8 @@ git clone https://github.com/WiringPi/WiringPi
 cd ~/src/WiringPi/
 ./build
 ```
+#### Check GPIO pins availability
+`gpio readall`
 
 #### Install supplementary library ssd1306 (OLED driver)
 
@@ -74,9 +76,6 @@ cd ~/src/thermostat
 sudo pip install -U setuptools
 sudo pip install -r requirements.txt 
 ```
-
-#### Check GPIO pins availability
-`gpio readall`
 
 #### add new entry to user's crontab
 `crontab -e`
