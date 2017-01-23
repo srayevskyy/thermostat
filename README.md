@@ -51,18 +51,18 @@ sudo pip install psutil
 #### Install supplementary library ssd1306 (OLED driver)
 
 ```
-cd ~
+cd ~/src
 git clone https://github.com/rm-hull/ssd1306
-cd ~/ssd1306
+cd ~/src/ssd1306
 sudo python setup.py install
 ```
 
 #### Clone thermostat control project
 
 ```
-cd ~
+cd ~/src
 git clone https://github.com/srayevskyy/thermostat
-cd thermostat
+cd ~/src/thermostat
 ```
 
 #### Check GPIO pins availability
