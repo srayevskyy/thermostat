@@ -4,6 +4,15 @@ This is a project to override control of a home thermostat with Raspbery Pi.
 
 #### Install Raspbian Jessie Lite from https://www.raspberrypi.org/downloads/raspbian
 
+#### pre-configure steps with raspi-config
+`sudo raspi-config`
+In the program:
+- change user password
+- set host name
+- set memory split
+- set 'US' keyboard layout
+- expand filesystem
+
 #### Open the wpa-supplicant configuration file in nano
 ```
 sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
