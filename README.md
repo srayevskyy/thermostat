@@ -82,9 +82,9 @@ sudo pip install -r requirements.txt
 
 #### add the following entry to users crontab
 ##### For thermostat control
-`* * * * * /home/pi/thermostat/thermostat_control/thermostat_control_runner.sh`
+`* * * * * /home/pi/src/thermostat/thermostat_control/thermostat_control_runner.sh`
 ##### For smart outlet
-`* * * * * /home/pi/thermostat/smart_outlet_control/smart_outlet_runner.sh`
+`* * * * * /home/pi/src/thermostat/smart_outlet_control/smart_outlet_runner.sh`
 
 ### Adding a hardware clock (Dallas DS3231) to Raspberry Pi
 #### list devices on i2c bus
