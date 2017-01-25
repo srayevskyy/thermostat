@@ -28,7 +28,7 @@ network={
 ```
 Bounce wifi adapter:
 ```
-sudo ifdown wlan0; sudo ifup wlan0; inet addr
+sudo ifdown wlan0; sudo ifup wlan0; ip addr
 ```
 
 #### Regenerate ssh keys
