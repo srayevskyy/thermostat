@@ -3,7 +3,7 @@
  *
  *  Copyright 2016 iBeech
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  Licensed under the Apache License, Version 2.0 (the "License") you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -63,16 +63,16 @@ def initialize() {
 
     subscribe(location, null, response, [filterEvents: false])
 
-    setupVirtualRelay(deviceName1, deviceType1, deviceConfig1);
+    setupVirtualRelay(deviceName1, deviceType1, deviceConfig1)
 }
 
 def updated() {
     log.debug "Updated with settings: ${settings}"
 
-    updateGPIOState();
-    unsubscribe();
+    updateGPIOState()
+    unsubscribe()
 
-    updateVirtualRelay(deviceName1, deviceType1, deviceConfig1);
+    updateVirtualRelay(deviceName1, deviceType1, deviceConfig1)
 
     subscribe(location, null, response, [filterEvents: false])
 }
@@ -80,20 +80,20 @@ def updated() {
 def updateVirtualRelay(deviceName, deviceType, deviceConfig) {
 
     // If user didn't fill this device out, skip it
-    if (!deviceName) return;
+    if (!deviceName) return
 
-    def theDeviceNetworkId = "";
+    def theDeviceNetworkId = ""
     switch (deviceType) {
         case "switch":
-            theDeviceNetworkId = getRelayID(deviceConfig);
-            break;
+            theDeviceNetworkId = getRelayID(deviceConfig)
+            break
 
         case "temperatureSensor":
-            theDeviceNetworkId = getTemperatureID(deviceConfig);
-            break;
+            theDeviceNetworkId = getTemperatureID(deviceConfig)
+            break
     }
 
-    log.trace "Searching for: $theDeviceNetworkId";
+    log.trace "Searching for: $theDeviceNetworkId"
 
     def theDevice = getChildDevices().find { d -> d.deviceNetworkId.startsWith(theDeviceNetworkId) }
 
@@ -106,17 +106,17 @@ def updateVirtualRelay(deviceName, deviceType, deviceConfig) {
         if (deviceType == "switch") { // Actions specific for the relay device type
             subscribe(theDevice, "switch", switchChange)
             log.debug "Setting initial state of $deviceName to off"
-            setDeviceState(deviceConfig, "off");
-            theDevice.off();
+            setDeviceState(deviceConfig, "off")
+            theDevice.off()
         } else {
-            updateTempratureSensor();
+            updateTempratureSensor()
         }
 
     } else { // The switch does not exist
         if (deviceName) { // The user filled in data about this switch
             log.debug "This device does not exist, creating a new one now"
-            /*setupVirtualRelay(deviceId, gpioName);*/
-            setupVirtualRelay(deviceName, deviceType, deviceConfig);
+            /*setupVirtualRelay(deviceId, gpioName)*/
+            setupVirtualRelay(deviceName, deviceType, deviceConfig)
         }
     }
 
@@ -136,16 +136,16 @@ def setupVirtualRelay(deviceName, deviceType, deviceConfig) {
                 subscribe(d, "switch", switchChange)
 
                 log.debug "Setting initial state of $gpioName to off"
-                setDeviceState(deviceConfig, "off");
-                d.off();
-                break;
+                setDeviceState(deviceConfig, "off")
+                d.off()
+                break
 
             case "temperatureSensor":
                 log.trace "Found a temperature sensor called $deviceName on $deviceConfig"
                 def d = addChildDevice("ibeech", "Virtual Pi Temperature", getTemperatureID(deviceConfig), theHub.id, [label: deviceName, name: deviceName])
                 state.temperatureZone = deviceConfig
-                updateTempratureSensor();
-                break;
+                updateTempratureSensor()
+                break
         }
     }
 }
@@ -171,14 +171,14 @@ def uninstalled() {
 }
 
 def response(evt) {
-    def msg = parseLanMessage(evt.description);
+    def msg = parseLanMessage(evt.description)
     if (msg && msg.body) {
 
         // This is the GPIO headder state message
         def children = getChildDevices(false)
         if (msg.json) {
             msg.json.GPIO.each { item ->
-                updateRelayDevice(item.key, item.value.value, children);
+                updateRelayDevice(item.key, item.value.value, children)
             }
 
             log.trace "Finished Getting GPIO State"
@@ -188,11 +188,11 @@ def response(evt) {
         if (tempContent.size() == 2 && tempContent[0].isNumber() && tempContent[1].isNumber()) {
 
             // Got temperature response
-            def networkId = getTemperatureID(state.temperatureZone);
+            def networkId = getTemperatureID(state.temperatureZone)
             def theDevice = getChildDevices().find { d -> d.deviceNetworkId.startsWith(networkId) }
 
             if (theDevice) {
-                theDevice.setTemperature(msg.body, state.temperatureZone);
+                theDevice.setTemperature(msg.body, state.temperatureZone)
                 log.trace "$theDevice set to $msg.body"
             }
         }
@@ -212,45 +212,45 @@ def updateTempratureSensor() {
 
     log.trace "Updating temperature for $state.temperatureZone"
 
-    executeRequest("/devices/" + state.temperatureZone + "/sensor/temperature/c", "GET", false, null);
+    executeRequest("/devices/" + state.temperatureZone + "/sensor/temperature/c", "GET", false, null)
 
-    runIn(60, updateTempratureSensor);
+    runIn(60, updateTempratureSensor)
 }
 
 def updateGPIOState() {
 
     log.trace "Updating GPIO map"
 
-    executeRequest("/*", "GET", false, null);
+    executeRequest("/*", "GET", false, null)
 
-    runIn(10, updateGPIOState);
+    runIn(10, updateGPIOState)
 }
 
 def switchChange(evt) {
 
-    log.debug "Switch event!";
-    log.debug evt.value;
-    if (evt.value == "on" || evt.value == "off") return;
+    log.debug "Switch event!"
+    log.debug evt.value
+    if (evt.value == "on" || evt.value == "off") return
 
 
-    def parts = evt.value.tokenize('.');
-    def deviceId = parts[1];
-    def GPIO = parts[5];
-    def state = parts[6];
+    def parts = evt.value.tokenize('.')
+    def deviceId = parts[1]
+    def GPIO = parts[5]
+    def state = parts[6]
 
-    log.debug state;
+    log.debug state
 
     switch (state) {
         case "refresh":
             // Refresh this switches button
             log.debug "Refreshing the state of GPIO " + GPIO
             executeRequest("/*", "GET", false, null)
-            return;
+            return
     }
 
-    setDeviceState(GPIO, state);
+    setDeviceState(GPIO, state)
 
-    return;
+    return
 }
 
 
@@ -258,15 +258,15 @@ def setDeviceState(gpio, state) {
     log.debug "Executing 'setDeviceState'"
 
     // Determine the path to post which will set the switch to the desired state
-    def Path = "/GPIO/" + gpio + "/value/";
-    Path += (state == "on") ? "1" : "0";
+    def Path = "/GPIO/" + gpio + "/value/"
+    Path += (state == "on") ? "1" : "0"
 
-    executeRequest(Path, "POST", true, gpio);
+    executeRequest(Path, "POST", true, gpio)
 }
 
 def executeRequest(Path, method, setGPIODirection, gpioPin) {
 
-    log.debug "The " + method + " path is: " + Path;
+    log.debug "The " + method + " path is: " + Path
 
     def headers = [:]
     headers.put("HOST", "$settings.piIP:$settings.piPort")
@@ -279,7 +279,7 @@ def executeRequest(Path, method, setGPIODirection, gpioPin) {
                     path: "/GPIO/" + gpioPin + "/function/OUT",
                     headers: headers)
 
-            sendHubCommand(setDirection);
+            sendHubCommand(setDirection)
         }
 
         def actualAction = new physicalgraph.device.HubAction(
