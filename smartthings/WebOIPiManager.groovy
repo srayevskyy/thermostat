@@ -272,7 +272,7 @@ def executeRequest(Path, method, setGPIODirection, gpioPin) {
     try {
 
         if (setGPIODirection) {
-            def setDirection = new physicalgraph.device.HubAction(
+            physicalgraph.device.HubAction setDirection = new physicalgraph.device.HubAction(
                     method: "POST",
                     path: "/GPIO/" + gpioPin + "/function/OUT",
                     headers: headers)
@@ -280,7 +280,7 @@ def executeRequest(Path, method, setGPIODirection, gpioPin) {
             sendHubCommand(setDirection)
         }
 
-        def actualAction = new physicalgraph.device.HubAction(
+        physicalgraph.device.HubAction actualAction = new physicalgraph.device.HubAction(
                 method: method,
                 path: Path,
                 headers: headers)
