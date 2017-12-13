@@ -37,80 +37,19 @@ definition(
 preferences {
 
     section("Raspberry Pi Setup") {
-        input "piIP", "text", "title": "Raspberry Pi IP", multiple: false, required: true
-        input "piPort", "text", "title": "Raspberry Pi Port", multiple: false, required: true
+        input "piIP", "text", "title": "Raspberry Pi IP", multiple: false, required: true, defaultValue: "192.168.86.23"
+        input "piPort", "text", "title": "Raspberry Pi Port", multiple: false, required: true, defaultValue: "8000"
         input "theHub", "hub", title: "On which hub?", multiple: false, required: true
     }
 
     section("Device 1") {
-        input "deviceName1", "text", title: "Device Name", required: false
+        input "deviceName1", "text", title: "Device Name", required: false, defaultValue: "Pi relay 1"
         input "deviceType1", "enum", title: "Device Type", required: false, options: [
                 "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig1", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 2") {
-        input "deviceName2", "text", title: "Device Name", required: false
-        input "deviceType2", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig2", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 3") {
-        input "deviceName3", "text", title: "Device Name", required: false
-        input "deviceType3", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig3", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 4") {
-        input "deviceName4", "text", title: "Device Name", required: false
-        input "deviceType4", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig4", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 5") {
-        input "deviceName5", "text", title: "Device Name", required: false
-        input "deviceType5", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig5", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 6") {
-        input "deviceName6", "text", title: "Device Name", required: false
-        input "deviceType6", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig6", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 7") {
-        input "deviceName7", "text", title: "Device Name", required: false
-        input "deviceType7", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig7", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 8") {
-        input "deviceName8", "text", title: "Device Name", required: false
-        input "deviceType8", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig8", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 9") {
-        input "deviceName9", "text", title: "Device Name", required: false
-        input "deviceType9", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig9", "text", title: "GPIO# or Device Name", required: false
-    }
-    section("Device 10") {
-        input "deviceName10", "text", title: "Device Name", required: false
-        input "deviceType10", "enum", title: "Device Type", required: false, options: [
-                "switch"           : "Relay Switch",
-                "temperatureSensor": "Temperature Sensor"]
-        input "deviceConfig10", "text", title: "GPIO# or Device Name", required: false
+                "temperatureSensor": "Temperature Sensor"], defaultValue: "switch"
+        input "deviceConfig1", "text", title: "GPIO# or Device Name", required: false, defaultValue: "21"
+        input "deviceTimeStart1", "text", title: "Time relay ON (from)", required: false, defaultValue: "08:00"
+        input "deviceTimeEnd1", "text", title: "Time relay ON (to)", required: false, defaultValue: "01:00"
     }
 }
 
@@ -125,15 +64,6 @@ def initialize() {
     subscribe(location, null, response, [filterEvents: false])
 
     setupVirtualRelay(deviceName1, deviceType1, deviceConfig1);
-    setupVirtualRelay(deviceName2, deviceType2, deviceConfig2);
-    setupVirtualRelay(deviceName3, deviceType3, deviceConfig3);
-    setupVirtualRelay(deviceName4, deviceType4, deviceConfig4);
-    setupVirtualRelay(deviceName5, deviceType5, deviceConfig5);
-    setupVirtualRelay(deviceName6, deviceType6, deviceConfig6);
-    setupVirtualRelay(deviceName7, deviceType7, deviceConfig7);
-    setupVirtualRelay(deviceName8, deviceType8, deviceConfig8);
-    setupVirtualRelay(deviceName9, deviceType9, deviceConfig9);
-    setupVirtualRelay(deviceName10, deviceType10, deviceConfig10);
 }
 
 def updated() {
@@ -143,15 +73,6 @@ def updated() {
     unsubscribe();
 
     updateVirtualRelay(deviceName1, deviceType1, deviceConfig1);
-    updateVirtualRelay(deviceName2, deviceType2, deviceConfig2);
-    updateVirtualRelay(deviceName3, deviceType3, deviceConfig3);
-    updateVirtualRelay(deviceName4, deviceType4, deviceConfig4);
-    updateVirtualRelay(deviceName5, deviceType5, deviceConfig5);
-    updateVirtualRelay(deviceName6, deviceType6, deviceConfig6);
-    updateVirtualRelay(deviceName7, deviceType7, deviceConfig7);
-    updateVirtualRelay(deviceName8, deviceType8, deviceConfig8);
-    updateVirtualRelay(deviceName9, deviceType9, deviceConfig9);
-    updateVirtualRelay(deviceName10, deviceType10, deviceConfig10);
 
     subscribe(location, null, response, [filterEvents: false])
 }
