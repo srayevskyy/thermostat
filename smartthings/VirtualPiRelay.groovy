@@ -3,7 +3,7 @@
  *
  *  Copyright 2016 Tom Beech
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  Licensed under the Apache License, Version 2.0 (the "License") you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -53,27 +53,27 @@ def poll() {
 
     def lastState = device.currentValue("switch")
     sendEvent(name: "switch", value: device.deviceNetworkId + ".refresh")
-    sendEvent(name: "switch", value: lastState);
+    sendEvent(name: "switch", value: lastState)
 }
 
 def refresh() {
     log.debug "Executing 'refresh'"
 
-    poll();
+    poll()
 }
 
 def on() {
     log.debug "Executing 'on'"
 
-    sendEvent(name: "switch", value: device.deviceNetworkId + ".on");
-    sendEvent(name: "switch", value: "on");
+    sendEvent(name: "switch", value: device.deviceNetworkId + ".on")
+    sendEvent(name: "switch", value: "on")
 }
 
 def off() {
     log.debug "Executing 'off'"
 
-    sendEvent(name: "switch", value: device.deviceNetworkId + ".off");
-    sendEvent(name: "switch", value: "off");
+    sendEvent(name: "switch", value: device.deviceNetworkId + ".off")
+    sendEvent(name: "switch", value: "off")
 }
 
 def changeSwitchState(newState) {
@@ -82,9 +82,9 @@ def changeSwitchState(newState) {
     switch (newState) {
         case 1:
             sendEvent(name: "switch", value: "on")
-            break;
+            break
         case 0:
             sendEvent(name: "switch", value: "off")
-            break;
+            break
     }
 }
