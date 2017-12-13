@@ -63,7 +63,7 @@ def initialize() {
 
     subscribe(location, null, response, [filterEvents: false])
 
-    setupVirtualRelay(deviceName1, deviceType1, deviceConfig1)
+    setupVirtualRelay((String)deviceName1, (String)deviceType1, (String)deviceConfig1, (String)deviceTimeStart1, (String)deviceTimeEnd1)
 }
 
 def updated() {
@@ -72,12 +72,12 @@ def updated() {
     updateGPIOState()
     unsubscribe()
 
-    updateVirtualRelay(deviceName1, deviceType1, deviceConfig1)
+    updateVirtualRelay((String)deviceName1, (String)deviceType1, (String)deviceConfig1, (String)deviceTimeStart1, (String)deviceTimeEnd1)
 
     subscribe(location, null, response, [filterEvents: false])
 }
 
-def updateVirtualRelay(deviceName, deviceType, deviceConfig) {
+def updateVirtualRelay(String deviceName, String deviceType, String deviceConfig, String deviceTimeStart, String deviceTimeEnd) {
 
     // If user didn't fill this device out, skip it
     if (!deviceName) return
@@ -116,18 +116,20 @@ def updateVirtualRelay(deviceName, deviceType, deviceConfig) {
         if (deviceName) { // The user filled in data about this switch
             log.debug "This device does not exist, creating a new one now"
             /*setupVirtualRelay(deviceId, gpioName)*/
-            setupVirtualRelay(deviceName, deviceType, deviceConfig)
+            setupVirtualRelay(deviceName, deviceType, deviceConfig, deviceTimeStart, deviceTimeEnd)
         }
     }
 
 }
 
-def setupVirtualRelay(deviceName, deviceType, deviceConfig) {
-
+def setupVirtualRelay(String deviceName, String deviceType, String deviceConfig, String deviceTimeStart, String deviceTimeEnd) {
+    
     if (deviceName) {
         log.debug deviceName
         log.debug deviceType
         log.debug deviceConfig
+        log.debug deviceTimeStart
+        log.debug deviceTimeEnd
 
         switch (deviceType) {
             case "switch":
@@ -150,13 +152,11 @@ def setupVirtualRelay(deviceName, deviceType, deviceConfig) {
     }
 }
 
-def String getRelayID(deviceConfig) {
-
+String getRelayID(String deviceConfig) {
     return "piRelay." + settings.piIP + "." + deviceConfig
 }
 
-def String getTemperatureID(deviceConfig) {
-
+String getTemperatureID(String deviceConfig) {
     return "piTemp." + settings.piIP + "." + deviceConfig
 }
 
@@ -184,11 +184,11 @@ def response(evt) {
             log.trace "Finished Getting GPIO State"
         }
 
-        def tempContent = msg.body.tokenize('.')
+        String[] tempContent = msg.body.tokenize('.')
         if (tempContent.size() == 2 && tempContent[0].isNumber() && tempContent[1].isNumber()) {
 
             // Got temperature response
-            String networkId = getTemperatureID(state.temperatureZone)
+            String networkId = getTemperatureID((String)(state.temperatureZone))
             def theDevice = getChildDevices().find { d -> d.deviceNetworkId.startsWith(networkId) }
 
             if (theDevice) {
@@ -212,7 +212,7 @@ def updateTempratureSensor() {
 
     log.trace "Updating temperature for $state.temperatureZone"
 
-    executeRequest("/devices/" + state.temperatureZone + "/sensor/temperature/c", "GET", false, null)
+    executeRequest((String)("/devices/" + state.temperatureZone + "/sensor/temperature/"), "GET", false, null)
 
     runIn(60, updateTempratureSensor)
 }
@@ -234,7 +234,7 @@ def switchChange(evt) {
 
 
     String[] parts = evt.value.tokenize('.')
-    String deviceId = parts[1]
+    //String deviceId = parts[1]
     String GPIO = parts[5]
     String state = parts[6]
 
@@ -252,17 +252,17 @@ def switchChange(evt) {
 }
 
 
-def setDeviceState(gpio, state) {
+def setDeviceState(String gpio, String state) {
     log.debug "Executing 'setDeviceState'"
 
     // Determine the path to post which will set the switch to the desired state
-    def Path = "/GPIO/" + gpio + "/value/"
+    String Path = "/GPIO/" + gpio + "/value/"
     Path += (state == "on") ? "1" : "0"
 
     executeRequest(Path, "POST", true, gpio)
 }
 
-def executeRequest(Path, method, setGPIODirection, gpioPin) {
+def executeRequest(String Path, String method, boolean setGPIODirection, String gpioPin) {
 
     log.debug "The " + method + " path is: " + Path
 
