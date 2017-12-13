@@ -38,8 +38,23 @@ metadata {
             state("default", label: 'refresh', action: "polling.poll", icon: "st.secondary.refresh-icon")
         }
 
+        valueTile("timeStart", "device.timeStart", width: 2) {
+            state "default", label:"Start: 08:00"
+        }
+
+        valueTile("timeEnd", "device.timeEnd", width: 2) {
+            state "default", label:"End: 01:00"
+        }
+
+        /*
+        valueTile("overrideMode", "device.overrideMode", width: 2) {
+            state "default", label:"Override mode: NO"
+        }
+        */
+
         main "switch"
-        details(["switch", "refresh"])
+        details(["switch", "refresh", "timeStart", "timeEnd", "overrideMode"])
+
     }
 }
 
