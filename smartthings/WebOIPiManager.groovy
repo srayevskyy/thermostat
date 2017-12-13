@@ -82,7 +82,7 @@ def updateVirtualRelay(deviceName, deviceType, deviceConfig) {
     // If user didn't fill this device out, skip it
     if (!deviceName) return
 
-    def theDeviceNetworkId = ""
+    String theDeviceNetworkId = ""
     switch (deviceType) {
         case "switch":
             theDeviceNetworkId = getRelayID(deviceConfig)
@@ -142,7 +142,7 @@ def setupVirtualRelay(deviceName, deviceType, deviceConfig) {
 
             case "temperatureSensor":
                 log.trace "Found a temperature sensor called $deviceName on $deviceConfig"
-                def d = addChildDevice("ibeech", "Virtual Pi Temperature", getTemperatureID(deviceConfig), theHub.id, [label: deviceName, name: deviceName])
+                addChildDevice("ibeech", "Virtual Pi Temperature", getTemperatureID(deviceConfig), theHub.id, [label: deviceName, name: deviceName])
                 state.temperatureZone = deviceConfig
                 updateTempratureSensor()
                 break
@@ -174,7 +174,7 @@ def response(evt) {
     def msg = parseLanMessage(evt.description)
     if (msg && msg.body) {
 
-        // This is the GPIO headder state message
+        // This is the GPIO header state message
         def children = getChildDevices(false)
         if (msg.json) {
             msg.json.GPIO.each { item ->
@@ -188,7 +188,7 @@ def response(evt) {
         if (tempContent.size() == 2 && tempContent[0].isNumber() && tempContent[1].isNumber()) {
 
             // Got temperature response
-            def networkId = getTemperatureID(state.temperatureZone)
+            String networkId = getTemperatureID(state.temperatureZone)
             def theDevice = getChildDevices().find { d -> d.deviceNetworkId.startsWith(networkId) }
 
             if (theDevice) {
@@ -233,10 +233,10 @@ def switchChange(evt) {
     if (evt.value == "on" || evt.value == "off") return
 
 
-    def parts = evt.value.tokenize('.')
-    def deviceId = parts[1]
-    def GPIO = parts[5]
-    def state = parts[6]
+    String[] parts = evt.value.tokenize('.')
+    String deviceId = parts[1]
+    String GPIO = parts[5]
+    String state = parts[6]
 
     log.debug state
 
@@ -249,8 +249,6 @@ def switchChange(evt) {
     }
 
     setDeviceState(GPIO, state)
-
-    return
 }
 
 
@@ -268,7 +266,7 @@ def executeRequest(Path, method, setGPIODirection, gpioPin) {
 
     log.debug "The " + method + " path is: " + Path
 
-    def headers = [:]
+    LinkedHashMap headers = [:]
     headers.put("HOST", "$settings.piIP:$settings.piPort")
 
     try {
@@ -297,9 +295,9 @@ def executeRequest(Path, method, setGPIODirection, gpioPin) {
 /* Helper functions to get the network device ID */
 
 private String NetworkDeviceId() {
-    def iphex = convertIPtoHex(settings.piIP).toUpperCase()
-    def porthex = convertPortToHex(settings.piPort)
-    return "$iphex:$porthex"
+    String iphex = convertIPtoHex(settings.piIP).toUpperCase()
+    String porthex = convertPortToHex(settings.piPort)
+    return iphex + porthex
 }
 
 private String convertIPtoHex(ipAddress) {
@@ -309,7 +307,7 @@ private String convertIPtoHex(ipAddress) {
 
 }
 
-private String convertPortToHex(port) {
+private static String convertPortToHex(port) {
     String hexport = port.toString().format('%04x', port.toInteger())
     //log.debug hexport
     return hexport
