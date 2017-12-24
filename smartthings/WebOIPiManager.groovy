@@ -72,18 +72,20 @@ def updateVirtualRelay(String deviceName, String deviceConfig, String relayOnTim
 
     log.trace "Searching for: $theDeviceNetworkId"
 
-    def theDevice = getChildDevices().find { d -> d.deviceNetworkId.startsWith(theDeviceNetworkId) }
+    def d = getChildDevices().find { d -> d.deviceNetworkId.startsWith(theDeviceNetworkId) }
 
     if (theDevice) { // The switch already exists
         log.debug "Found existing device which we will now update"
-        theDevice.deviceNetworkId = theDeviceNetworkId + "." + deviceConfig
-        theDevice.label = deviceName
-        theDevice.name = deviceName
+        d.deviceNetworkId = theDeviceNetworkId + "." + deviceConfig
+        d.label = deviceName
+        d.name = deviceName
 
-        subscribe(theDevice, "switch", switchChange)
+        subscribe(d, "switch", switchChange)
+        /*
         log.debug "Setting initial state of $deviceName to off"
         setDeviceState(deviceConfig, "off", relayOnTimeStart, relayOnTimeEnd)
-        theDevice.off()
+        d.off()
+        */
     } else { // The switch does not exist
         if (deviceName) { // The user filled in data about this switch
             log.debug "This device does not exist, creating a new one now"
@@ -97,10 +99,12 @@ def updateVirtualRelay(String deviceName, String deviceConfig, String relayOnTim
 def setupVirtualRelay(String deviceName, String deviceConfig, String deviceTimeStart, String deviceTimeEnd) {
 
     if (deviceName) {
+        /*
         log.debug deviceName
         log.debug deviceConfig
         log.debug deviceTimeStart
         log.debug deviceTimeEnd
+        */
 
         log.trace "Found a relay switch called $deviceName on GPIO #$deviceConfig"
         def d = addChildDevice("ibeech", "Virtual Pi Relay", getRelayID(deviceConfig), theHub.id, [label: deviceName, name: deviceName])
@@ -120,10 +124,10 @@ String getRelayID(String deviceConfig) {
 }
 
 def uninstalled() {
-    unsubscribe()
+    // unsubscribe() -- deprecated
     def delete = getChildDevices()
     delete.each {
-        unsubscribe(it)
+        //unsubscribe(it)
         log.trace "about to delete device"
         deleteChildDevice(it.deviceNetworkId)
     }
@@ -165,17 +169,16 @@ def updateGPIOState() {
 
 def switchChange(evt) {
 
-    log.debug "Switch event!"
-    log.debug evt.value
-    if (evt.value == "on" || evt.value == "off") return
+    log.debug "switchChange: switch event, value: ${evt.value}"
 
+    if (evt.value == "on" || evt.value == "off") return
 
     String[] parts = evt.value.tokenize('.')
     //String deviceId = parts[1]
     String GPIO = parts[5]
     String state = parts[6]
 
-    log.debug state
+    log.debug "switchChange: state: ${state}"
 
     switch (state) {
         case "refresh":
@@ -248,4 +251,3 @@ private static String convertPortToHex(port) {
     //log.debug hexport
     return hexport
 }
- 
