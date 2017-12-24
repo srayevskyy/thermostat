@@ -40,7 +40,7 @@ preferences {
 }
 
 def installed() {
-    log.debug "Installed with settings: ${settings}"
+    //log.debug "Installed with settings: ${settings}"
 
     initialize()
 }
@@ -53,7 +53,7 @@ def initialize() {
 }
 
 def updated() {
-    log.debug "Updated with settings: ${settings}"
+    //log.debug "Updated with settings: ${settings}"
 
     updateGPIOState()
     unsubscribe()
@@ -70,12 +70,12 @@ def updateVirtualRelay(String deviceName, String deviceConfig, String relayOnTim
 
     String theDeviceNetworkId = getRelayID(deviceConfig)
 
-    log.trace "Searching for: $theDeviceNetworkId"
+    //log.trace "updateVirtualRelay: searching for: $theDeviceNetworkId"
 
     def d = getChildDevices().find { d -> d.deviceNetworkId.startsWith(theDeviceNetworkId) }
 
-    if (theDevice) { // The switch already exists
-        log.debug "Found existing device which we will now update"
+    if (d) { // The switch already exists
+        //log.debug "Found existing device which we will now update"
         d.deviceNetworkId = theDeviceNetworkId + "." + deviceConfig
         d.label = deviceName
         d.name = deviceName
@@ -88,8 +88,7 @@ def updateVirtualRelay(String deviceName, String deviceConfig, String relayOnTim
         */
     } else { // The switch does not exist
         if (deviceName) { // The user filled in data about this switch
-            log.debug "This device does not exist, creating a new one now"
-            /*setupVirtualRelay(deviceId, gpioName)*/
+            //log.debug "updateVirtualRelay: device '${deviceName}' does not exist, creating a new one now"
             setupVirtualRelay(deviceName, deviceConfig, relayOnTimeStart, relayOnTimeEnd)
         }
     }
@@ -106,7 +105,7 @@ def setupVirtualRelay(String deviceName, String deviceConfig, String deviceTimeS
         log.debug deviceTimeEnd
         */
 
-        log.trace "Found a relay switch called $deviceName on GPIO #$deviceConfig"
+        //log.trace "Found a relay switch called $deviceName on GPIO #$deviceConfig"
         def d = addChildDevice("ibeech", "Virtual Pi Relay", getRelayID(deviceConfig), theHub.id, [label: deviceName, name: deviceName])
         subscribe(d, "switch", switchChange)
 
@@ -128,7 +127,7 @@ def uninstalled() {
     def delete = getChildDevices()
     delete.each {
         //unsubscribe(it)
-        log.trace "about to delete device"
+        //log.trace "about to delete device"
         deleteChildDevice(it.deviceNetworkId)
     }
 }
@@ -144,7 +143,7 @@ def response(evt) {
                 updateRelayDevice(item.key, item.value.value, children)
             }
 
-            log.trace "Finished Getting GPIO State"
+            //log.trace "Finished Getting GPIO State"
         }
     }
 }
@@ -153,14 +152,14 @@ def updateRelayDevice(GPIO, state, childDevices) {
 
     def theSwitch = childDevices.find { d -> d.deviceNetworkId.endsWith(".$GPIO") }
     if (theSwitch) {
-        log.debug "Updating switch $theSwitch for GPIO $GPIO with value $state"
+        //log.debug "Updating switch $theSwitch for GPIO $GPIO with value $state"
         theSwitch.changeSwitchState(state)
     }
 }
 
 def updateGPIOState() {
 
-    log.trace "Updating GPIO map"
+    //log.trace "Updating GPIO map"
 
     executeRequest("/*", "GET", false, null)
 
@@ -169,7 +168,7 @@ def updateGPIOState() {
 
 def switchChange(evt) {
 
-    log.debug "switchChange: switch event, value: ${evt.value}"
+    //log.debug "switchChange: switch event, value: ${evt.value}"
 
     if (evt.value == "on" || evt.value == "off") return
 
@@ -178,12 +177,12 @@ def switchChange(evt) {
     String GPIO = parts[5]
     String state = parts[6]
 
-    log.debug "switchChange: state: ${state}"
+    //log.debug "switchChange: state: ${state}"
 
     switch (state) {
         case "refresh":
             // Refresh this switches button
-            log.debug "Refreshing the state of GPIO " + GPIO
+            //log.debug "Refreshing the state of GPIO " + GPIO
             executeRequest("/*", "GET", false, null)
             return
     }
@@ -192,7 +191,7 @@ def switchChange(evt) {
 }
 
 def setDeviceState(String gpio, String state, String timeStart, String timeEnd) {
-    log.debug "Executing 'setDeviceState(${gpio}, '${state}', '${timeStart}', '${timeEnd}')"
+    //log.debug "Executing 'setDeviceState(${gpio}, '${state}', '${timeStart}', '${timeEnd}')"
 
     // Determine the path to post which will set the switch to the desired state
     String Path = "/GPIO/" + gpio + "/value/"
@@ -203,7 +202,7 @@ def setDeviceState(String gpio, String state, String timeStart, String timeEnd) 
 
 def executeRequest(String Path, String method, boolean setGPIODirection, String gpioPin) {
 
-    log.debug "The " + method + " path is: " + Path
+    //log.debug "The " + method + " path is: " + Path
 
     LinkedHashMap headers = [:]
     headers.put("HOST", "$settings.piIP:$settings.piPort")
