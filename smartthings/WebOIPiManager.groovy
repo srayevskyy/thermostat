@@ -25,27 +25,28 @@ definition(
 
 preferences {
 
-    section("Raspberry Pi Setup") {
-        input "piIP", "text", "title": "Raspberry Pi IP", multiple: false, required: true, defaultValue: "192.168.86.23"
-        input "piPort", "text", "title": "Raspberry Pi Port", multiple: false, required: true, defaultValue: "8001"
+    section("Thermostat") {
+        input "deviceName1", "text", title: "Device Name", required: false, defaultValue: "Thermostat relay"
+        input "piIP1", "text", "title": "Raspberry Pi IP", multiple: false, required: true, defaultValue: "192.168.86.23"
+        input "piPort1", "text", "title": "Raspberry Pi Port", multiple: false, required: true, defaultValue: "8001"
+        input "gpioNumber1", "text", title: "Raspberry Pi GPIO#", required: false, defaultValue: "21"
+        input "deviceTimeStart1", "text", title: "Time relay ON (from)", required: false, defaultValue: "08:00"
+        input "deviceTimeEnd1", "text", title: "Time relay ON (to)", required: false, defaultValue: "01:00"
+    }
+
+    section("Fireplace outlet") {
+        input "deviceName2", "text", title: "Device Name", required: false, defaultValue: "Fireplace outlet"
+        input "piIP2", "text", "title": "Raspberry Pi IP", multiple: false, required: true, defaultValue: "192.168.86.65"
+        input "piPort2", "text", "title": "Raspberry Pi Port", multiple: false, required: true, defaultValue: "8001"
+        input "gpioNumber2", "text", title: "Raspberry Pi GPIO#", required: false, defaultValue: "14"
+        input "deviceTimeStart2", "text", title: "Time relay ON (from)", required: false, defaultValue: "08:00"
+        input "deviceTimeEnd2", "text", title: "Time relay ON (to)", required: false, defaultValue: "01:00"
+    }
+
+    section("Application setup") {
         input "theHub", "hub", title: "On which hub?", multiple: false, required: true
     }
 
-    section("Device 1") {
-        input "deviceName1", "text", title: "Device Name", required: false, defaultValue: "Thermostat relay"
-        input "gpioNumber1", "text", title: "GPIO#", required: false, defaultValue: "21"
-        input "deviceTimeStart1", "text", title: "Time relay ON (from)", required: false, defaultValue: "08:00"
-        input "deviceTimeEnd1", "text", title: "Time relay ON (to)", required: false, defaultValue: "01:00"
-    }
-
-    /*
-    section("Device 2") {
-        input "deviceName1", "text", title: "Device Name", required: false, defaultValue: "Pi relay 1"
-        input "gpioNumber2", "text", title: "GPIO#", required: false, defaultValue: "21"
-        input "deviceTimeStart1", "text", title: "Time relay ON (from)", required: false, defaultValue: "08:00"
-        input "deviceTimeEnd1", "text", title: "Time relay ON (to)", required: false, defaultValue: "01:00"
-    }
-    */
 }
 
 def installed() {
@@ -58,28 +59,28 @@ def initialize() {
 
     subscribe(location, null, response, [filterEvents: false])
 
-    setupVirtualRelay((String)deviceName1, (String)gpioNumber1, (String)deviceTimeStart1, (String)deviceTimeEnd1)
-    setupVirtualRelay((String)deviceName2, (String)gpioNumber2, (String)deviceTimeStart2, (String)deviceTimeEnd2)
+    setupVirtualRelay((String)deviceName1, (String)piIP1, (String)piPort1, (String)gpioNumber1, (String)deviceTimeStart1, (String)deviceTimeEnd1)
+    setupVirtualRelay((String)deviceName2, (String)piIP2, (String)piPort2, (String)gpioNumber2, (String)deviceTimeStart2, (String)deviceTimeEnd2)
 }
 
 def updated() {
     //log.debug "Updated with settings: ${settings}"
 
-    updateGPIOState()
+    //updateGPIOState()
     unsubscribe()
 
-    updateVirtualRelay((String)deviceName1, (String)gpioNumber1, (String)deviceTimeStart1, (String)deviceTimeEnd1)
-    updateVirtualRelay((String)deviceName2, (String)gpioNumber2, (String)deviceTimeStart2, (String)deviceTimeEnd2)
+    updateVirtualRelay((String)deviceName1, (String)piIP1, (String)piPort1, (String)gpioNumber1, (String)deviceTimeStart1, (String)deviceTimeEnd1)
+    updateVirtualRelay((String)deviceName2, (String)piIP2, (String)piPort2, (String)gpioNumber2, (String)deviceTimeStart2, (String)deviceTimeEnd2)
 
     subscribe(location, null, response, [filterEvents: false])
 }
 
-def updateVirtualRelay(String deviceName, String gpioNumber, String relayOnTimeStart, String relayOnTimeEnd) {
+def updateVirtualRelay(String deviceName, String piIP, String piPort, String gpioNumber, String relayOnTimeStart, String relayOnTimeEnd) {
 
     // If user didn't fill this device out, skip it
     if (!deviceName) return
 
-    String theDeviceNetworkId = getRelayID((String)settings.piIP, gpioNumber)
+    String theDeviceNetworkId = getRelayID(piIP, piPort, gpioNumber)
 
     //log.trace "updateVirtualRelay: searching for: $theDeviceNetworkId"
 
@@ -100,13 +101,13 @@ def updateVirtualRelay(String deviceName, String gpioNumber, String relayOnTimeS
     } else { // The switch does not exist
         if (deviceName) { // The user filled in data about this switch
             //log.debug "updateVirtualRelay: device '${deviceName}' does not exist, creating a new one now"
-            setupVirtualRelay(deviceName, gpioNumber, relayOnTimeStart, relayOnTimeEnd)
+            setupVirtualRelay(deviceName, piIP, piPort, gpioNumber, relayOnTimeStart, relayOnTimeEnd)
         }
     }
 
 }
 
-def setupVirtualRelay(String deviceName, String gpioNumber, String deviceTimeStart, String deviceTimeEnd) {
+def setupVirtualRelay(String deviceName, String piIP, String piPort, String gpioNumber, String deviceTimeStart, String deviceTimeEnd) {
 
     if (deviceName) {
         /*
@@ -117,7 +118,7 @@ def setupVirtualRelay(String deviceName, String gpioNumber, String deviceTimeSta
         */
 
         //log.trace "Found a relay switch called $deviceName on GPIO #${gpioNumber}"
-        def d = addChildDevice("ibeech", "Virtual Pi Relay", getRelayID((String)settings.piIP, gpioNumber), theHub.id, [label: deviceName, name: deviceName])
+        def d = addChildDevice("ibeech", "Virtual Pi Relay", getRelayID(piIP, piPort, gpioNumber), theHub.id, [label: deviceName, name: deviceName])
         subscribe(d, "switch", switchChange)
 
         /*
@@ -129,8 +130,8 @@ def setupVirtualRelay(String deviceName, String gpioNumber, String deviceTimeSta
     }
 }
 
-static String getRelayID(String piIP, String gpioNumber) {
-    return "piRelay." + piIP + "." + gpioNumber
+static String getRelayID(String piIP, String piPort, String gpioNumber) {
+    return "piRelay." + piIP + "." + piPort + "." + gpioNumber
 }
 
 def uninstalled() {
@@ -168,6 +169,7 @@ static updateRelayDevice(GPIO, state, childDevices) {
     }
 }
 
+/*
 def updateGPIOState() {
 
     //log.trace "Updating GPIO map"
@@ -176,6 +178,7 @@ def updateGPIOState() {
 
     runIn(10, updateGPIOState)
 }
+*/
 
 def switchChange(evt) {
 
@@ -184,9 +187,10 @@ def switchChange(evt) {
     if (evt.value == "on" || evt.value == "off") return
 
     String[] parts = evt.value.tokenize('.')
-    //String deviceId = parts[1]
-    String GPIO = parts[5]
-    String state = parts[6]
+    String ipAddr = parts[1] + "." + parts[2] + "." + parts[3] + "." + parts[4]
+    String ipPort = parts[5]
+    String GPIO = parts[7]
+    String state = parts[8]
 
     //log.debug "switchChange: state: ${state}"
 
@@ -194,29 +198,43 @@ def switchChange(evt) {
         case "refresh":
             // Refresh this switches button
             //log.debug "Refreshing the state of GPIO " + GPIO
-            executeRequest("/*", "GET", false, null)
+            executeRequest(ipAddr, ipPort, "/*", "GET", false, null)
             return
     }
 
-    setDeviceState(GPIO, state, (String)deviceTimeStart1, (String)deviceTimeEnd1)
+    setDeviceState(ipAddr, ipPort, GPIO, state, (String)deviceTimeStart1, (String)deviceTimeEnd1)
 }
 
-def setDeviceState(String gpio, String state, String timeStart, String timeEnd) {
-    //log.debug "Executing 'setDeviceState(${gpio}, '${state}', '${timeStart}', '${timeEnd}')"
+def setDeviceState(String ipAddr, String ipPort, String gpioPin, String state, String timeStart, String timeEnd) {
+    log.debug "Executing 'setDeviceState('${ipAddr}', '${ipPort}', '${gpioPin}', '${state}', '${timeStart}', '${timeEnd}')"
 
-    // Determine the path to post which will set the switch to the desired state
-    String Path = "/GPIO/" + gpio + "/value/"
-    Path += (state == "on") ? "1" : "0"
+    LinkedHashMap headers = [:]
+    headers.put("HOST", "${ipAddr}:${ipPort}")
 
-    executeRequest(Path, "POST", true, gpio)
+    String stateInt = (state == 'on' ? "1" : "0")
+
+    try {
+
+        physicalgraph.device.HubAction actualAction = new physicalgraph.device.HubAction(
+                method: method,
+                path: "/GPIO/" + gpioPin,
+                headers: headers,
+                body: "{\"state\":\"${stateInt}\"}"
+        )
+
+        sendHubCommand(actualAction)
+    }
+    catch (Exception e) {
+        log.debug "Hit Exception $e on $hubAction"
+    }
 }
 
-def executeRequest(String Path, String method, boolean setGPIODirection, String gpioPin) {
+def executeRequest(String ipAddr, String ipPort, String Path, String method, boolean setGPIODirection, String gpioPin) {
 
     //log.debug "The " + method + " path is: " + Path
 
     LinkedHashMap headers = [:]
-    headers.put("HOST", "$settings.piIP:$settings.piPort")
+    headers.put("HOST", "${ipAddr}:${ipPort}")
 
     try {
 
