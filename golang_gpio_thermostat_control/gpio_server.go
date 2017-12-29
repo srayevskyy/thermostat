@@ -102,9 +102,9 @@ func ModifyGpioEndpoint(w http.ResponseWriter, r *http.Request) {
 		if item.Number == params["number"] {
 			found = true
 			fmt.Printf("Found, comparing\n %+v\n %+v\n", gpioPorts[index], gpioPort)
-			if !compareGpio(gpioPorts[index], gpioPort) {
+			if !compareGpio(item, gpioPort) {
 				//fmt.Print("Not equal, saving config")
-				gpioPorts[index] = gpioPort
+				item = gpioPort
 				saveConfig()
 			} /* else {
 				//fmt.Print("Equal, not saving anything")
@@ -173,13 +173,17 @@ func displayData() {
 		for _, gpioPort := range gpioPorts {
 			if gpioPort.DisplayDev != "" {
 				img := image.NewRGBA(image.Rect(0, 0, 128, 64))
-				addLabel(img, 0, 20, time.Now().Format("15:04:05")+" PORT: "+gpioPort.Number)
+				timeNow := time.Now()
+				addLabel(img, 0, 20, timeNow.Format("15:04:05")+" PORT: "+gpioPort.Number)
 				stateString := "ON"
 				if gpioPort.State == "0" {
 					stateString = "OFF"
 				}
-				addLabel(img, 0, 40, "State: "+stateString)
-				addLabel(img, 0, 60, gpioPort.TimeStart+" - "+gpioPort.TimeEnd)
+				addLabel(img, 0, 40, "State: "+stateString+" (" + gpioPort.State + ")")
+				if (gpioPort.TimeStart != "") && (gpioPort.TimeEnd != "") {
+					addLabel(img, 0, 60, gpioPort.TimeStart+" - "+gpioPort.TimeEnd)
+					
+				}
 
 				d, err := monochromeoled.Open(&i2c.Devfs{Dev: gpioPort.DisplayDev})
 				if err != nil {
