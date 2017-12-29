@@ -1,23 +1,32 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/goiot/devices/monochromeoled"
 	"github.com/gorilla/mux"
 	"github.com/stianeikeland/go-rpio"
+	"golang.org/x/exp/io/i2c"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
+	"image"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"bytes"
+	"time"
 )
 
 type GpioPort struct {
-	Number    string `json:"number"`
-	State     string `json:"state"`
-	TimeStart string `json:"timestart"`
-	TimeEnd   string `json:"timeend"`
+	Number     string `json:"number"`
+	State      string `json:"state"`
+	TimeStart  string `json:"timestart"`
+	TimeEnd    string `json:"timeend"`
+	DisplayDev string `json:"displaydev"`
 }
 
 var gpioPorts []GpioPort
@@ -113,6 +122,11 @@ func ModifyGpioEndpoint(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	//json.NewEncoder(w).Encode(gpioPorts)
 
+	setGpioState(portNumberInt, gpioPort.State)
+
+}
+
+func setGpioState(portNumber int, portState string) {
 	if err := rpio.Open(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -120,13 +134,13 @@ func ModifyGpioEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	defer rpio.Close()
 
-	pin := rpio.Pin(portNumberInt)
+	pin := rpio.Pin(portNumber)
 
 	pin.Output()
 
-	if gpioPort.State == "1" {
+	if portState == "1" {
 		pin.High()
-	} else if gpioPort.State == "0" {
+	} else if portState == "0" {
 		pin.Low()
 	}
 }
@@ -141,11 +155,58 @@ func saveConfig() {
 	os.Stdout.Write(append(b, '\n'))
 }
 
+func addLabel(img *image.RGBA, x, y int, label string) {
+	col := color.RGBA{200, 100, 0, 255}
+	point := fixed.Point26_6{fixed.Int26_6(x * 64), fixed.Int26_6(y * 64)}
+
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(col),
+		Face: basicfont.Face7x13, /*inconsolata.Regular8x16*/
+		Dot:  point,
+	}
+	d.DrawString(label)
+}
+
+func displayData() {
+	for {
+		for _, gpioPort := range gpioPorts {
+			if gpioPort.DisplayDev != "" {
+				img := image.NewRGBA(image.Rect(0, 0, 128, 64))
+				addLabel(img, 0, 20, time.Now().Format("15:04:05")+" PORT: "+gpioPort.Number)
+				stateString := "ON"
+				if gpioPort.State == "0" {
+					stateString = "OFF"
+				}
+				addLabel(img, 0, 40, "State: "+stateString)
+				addLabel(img, 0, 60, gpioPort.TimeStart+" - "+gpioPort.TimeEnd)
+
+				d, err := monochromeoled.Open(&i2c.Devfs{Dev: gpioPort.DisplayDev})
+				if err != nil {
+					panic(err)
+				}
+
+				if err := d.SetImage(0, 0, img); err != nil {
+					panic(err)
+				}
+
+				if err := d.Draw(); err != nil {
+					panic(err)
+				}
+				d.Close()
+			}
+		}
+		time.Sleep(5 * time.Second)
+	}
+}
+
 func main() {
 	router := mux.NewRouter()
-	gpioPorts = append(gpioPorts, GpioPort{Number: "14", State: "1", TimeStart: "08:00", TimeEnd: "01:00"})
+	gpioPorts = append(gpioPorts, GpioPort{Number: "21", State: "0", TimeStart: "08:00", TimeEnd: "01:00", DisplayDev: "/dev/i2c-1"})
+	setGpioState(21, "0")
 	router.HandleFunc("/GPIO", GetAllGpioEndpoint).Methods("GET")
 	router.HandleFunc("/GPIO/{number}", GetGpioEndpoint).Methods("GET")
 	router.HandleFunc("/GPIO/{number}", ModifyGpioEndpoint).Methods("POST")
+	go displayData()
 	log.Fatal(http.ListenAndServe(":8001", router))
 }
