@@ -181,33 +181,37 @@ func sliceTime(timeIn string) (int, int) {
 	return timeHour, timeMinute
 }
 
+func inTimeSpan(start, end, check time.Time) bool {
+    return check.After(start) && check.Before(end)
+}
+
 func (gpioPort GpioPort) deriveState(currTime time.Time) string {
 	if (gpioPort.TimeStart == "") || (gpioPort.TimeEnd == "") {
 		return gpioPort.State
 	}
 
-	return gpioPort.State
+	state := "0"
 
-	/*
-		state := "0"
+	timeStartHour, timeStartMinute := sliceTime(gpioPort.TimeStart)
+	timeEndHour, timeEndMinute := sliceTime(gpioPort.TimeEnd)
 
-		timeStartHour, timeStartMinute := sliceTime(gpioPort.TimeStart)
-		timeEndHour, timeEndMinute := sliceTime(gpioPort.TimeEnd)
+	timeStartToday := time.Date(currTime.Year(), currTime.Month(), currTime.Day(), timeStartHour, timeStartMinute, 0, 0, currTime.Location())
+	timeEndToday := time.Date(currTime.Year(), currTime.Month(), currTime.Day(), timeEndHour, timeEndMinute, 0, 0, currTime.Location())
 
-		timeStart := time.Date(currTime.Year(), currTime.Month(), currTime.Day(), timeStartHour, timeStartMinute, 0, 0, currTime.Location())
-		timeEnd := time.Date(currTime.Year(), currTime.Month(), currTime.Day(), timeEndHour, timeEndMinute, 0, 0, currTime.Location())
-
-		if timeStart.After(timeEnd) {
-			timeEnd = timeEnd.Add(24 * time.Hour)
-		}
-
-		if currTime.After(timeStart) && currTime.Before(timeEnd) {
+	if timeEndToday.After(timeStartToday) {
+		// simple interval within one day
+		if inTimeSpan (timeStartToday, timeEndToday, currTime) {
 			state = "1"
 		}
+	} else {
+		// need to check  both intervals from yesterday and today
+		if inTimeSpan(timeStartToday.Add(-24 * time.Hour), timeEndToday, currTime) || inTimeSpan(timeStartToday, timeEndToday.Add(24 * time.Hour), currTime) {
+			state = "1"
+		}
+	}
 
-		fmt.Printf("Derived state (%v) (%v) (%v): %s\n", timeStart, timeEnd, currTime, state)
-		return state
-	*/
+	//fmt.Printf("Derived state (%v) (%v) (%v): %s\n", timeStartToday, timeEndToday, currTime, state)
+	return state
 }
 
 func displayData() {
@@ -260,7 +264,7 @@ func displayData() {
 func main() {
 	router := mux.NewRouter()
 
-	gpioPort := GpioPort{Number: "21", State: "0", TimeStart: "08:00", TimeEnd: "02:00", DisplayDev: "/dev/i2c-1"}
+	gpioPort := GpioPort{Number: "21", State: "0", TimeStart: "08:00", TimeEnd: "02:07", DisplayDev: "/dev/i2c-1"}
 	gpioPorts = append(gpioPorts, gpioPort)
 	setGpioState(21, gpioPort.deriveState(time.Now()))
 
