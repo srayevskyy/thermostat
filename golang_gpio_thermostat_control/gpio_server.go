@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -89,7 +90,6 @@ func ModifyGpioEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var gpioPort GpioPort
-	//_ = json.NewDecoder(r.Body).Decode(&gpioPort)
 	_ = json.NewDecoder(bytes.NewReader(body)).Decode(&gpioPort)
 	gpioPort.Number = params["number"]
 
@@ -101,15 +101,14 @@ func ModifyGpioEndpoint(w http.ResponseWriter, r *http.Request) {
 	for index, item := range gpioPorts {
 		if item.Number == params["number"] {
 			found = true
-			fmt.Printf("Found, comparing\n %+v\n %+v\n", gpioPorts[index], gpioPort)
-			if !compareGpio(item, gpioPort) {
-				//fmt.Print("Not equal, saving config")
-				item = gpioPort
-				saveConfig()
-			} /* else {
-				//fmt.Print("Equal, not saving anything")
+			//fmt.Printf("Found, comparing\n %+v\n %+v\n", gpioPorts[index], gpioPort)
+			existing_eq_incoming := compareGpio(gpioPorts[index], gpioPort)
+			if !existing_eq_incoming || gpioPorts[index].State != gpioPort.State {
+				gpioPorts[index] = gpioPort
+				if !existing_eq_incoming {
+					saveConfig()
+				}
 			}
-			*/
 			break
 		}
 	}
@@ -119,8 +118,10 @@ func ModifyGpioEndpoint(w http.ResponseWriter, r *http.Request) {
 		saveConfig()
 	}
 
-	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	//json.NewEncoder(w).Encode(gpioPorts)
+	/*
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		json.NewEncoder(w).Encode(gpioPorts)
+	*/
 
 	setGpioState(portNumberInt, gpioPort.State)
 
@@ -146,8 +147,7 @@ func setGpioState(portNumber int, portState string) {
 }
 
 func saveConfig() {
-	// save config to disk
-	fmt.Print("Saving config to disk")
+	fmt.Print("Saving config to stdout")
 	b, err := json.MarshalIndent(gpioPorts, "", "  ")
 	if err != nil {
 		panic(err)
@@ -168,21 +168,74 @@ func addLabel(img *image.RGBA, x, y int, label string) {
 	d.DrawString(label)
 }
 
+func sliceTime(timeIn string) (int, int) {
+	timeSlice := strings.Split(timeIn, ":")
+	timeHour, err := strconv.Atoi(timeSlice[0])
+	if err != nil {
+		panic(err)
+	}
+	timeMinute, err := strconv.Atoi(timeSlice[1])
+	if err != nil {
+		panic(err)
+	}
+	return timeHour, timeMinute
+}
+
+func (gpioPort GpioPort) deriveState(currTime time.Time) string {
+	if (gpioPort.TimeStart == "") || (gpioPort.TimeEnd == "") {
+		return gpioPort.State
+	}
+
+	return gpioPort.State
+
+	/*
+		state := "0"
+
+		timeStartHour, timeStartMinute := sliceTime(gpioPort.TimeStart)
+		timeEndHour, timeEndMinute := sliceTime(gpioPort.TimeEnd)
+
+		timeStart := time.Date(currTime.Year(), currTime.Month(), currTime.Day(), timeStartHour, timeStartMinute, 0, 0, currTime.Location())
+		timeEnd := time.Date(currTime.Year(), currTime.Month(), currTime.Day(), timeEndHour, timeEndMinute, 0, 0, currTime.Location())
+
+		if timeStart.After(timeEnd) {
+			timeEnd = timeEnd.Add(24 * time.Hour)
+		}
+
+		if currTime.After(timeStart) && currTime.Before(timeEnd) {
+			state = "1"
+		}
+
+		fmt.Printf("Derived state (%v) (%v) (%v): %s\n", timeStart, timeEnd, currTime, state)
+		return state
+	*/
+}
+
 func displayData() {
 	for {
-		for _, gpioPort := range gpioPorts {
+		for index, gpioPort := range gpioPorts {
+			timeNow := time.Now()
+			newState := gpioPort.deriveState(timeNow)
+			if gpioPort.State != newState {
+				gpioPort.State = newState
+				gpioPorts[index] = gpioPort
+				portNumberInt, err := strconv.Atoi(gpioPort.Number)
+				if err != nil {
+					panic(err)
+				}
+				setGpioState(portNumberInt, gpioPort.State)
+			}
+
 			if gpioPort.DisplayDev != "" {
 				img := image.NewRGBA(image.Rect(0, 0, 128, 64))
-				timeNow := time.Now()
 				addLabel(img, 0, 20, timeNow.Format("15:04:05")+" PORT: "+gpioPort.Number)
+
 				stateString := "ON"
 				if gpioPort.State == "0" {
 					stateString = "OFF"
 				}
-				addLabel(img, 0, 40, "State: "+stateString+" (" + gpioPort.State + ")")
+				addLabel(img, 0, 40, "State: "+stateString+" ("+gpioPort.State+")")
 				if (gpioPort.TimeStart != "") && (gpioPort.TimeEnd != "") {
 					addLabel(img, 0, 60, gpioPort.TimeStart+" - "+gpioPort.TimeEnd)
-					
 				}
 
 				d, err := monochromeoled.Open(&i2c.Devfs{Dev: gpioPort.DisplayDev})
@@ -206,8 +259,11 @@ func displayData() {
 
 func main() {
 	router := mux.NewRouter()
-	gpioPorts = append(gpioPorts, GpioPort{Number: "21", State: "0", TimeStart: "08:00", TimeEnd: "01:00", DisplayDev: "/dev/i2c-1"})
-	setGpioState(21, "0")
+
+	gpioPort := GpioPort{Number: "21", State: "0", TimeStart: "08:00", TimeEnd: "02:00", DisplayDev: "/dev/i2c-1"}
+	gpioPorts = append(gpioPorts, gpioPort)
+	setGpioState(21, gpioPort.deriveState(time.Now()))
+
 	router.HandleFunc("/GPIO", GetAllGpioEndpoint).Methods("GET")
 	router.HandleFunc("/GPIO/{number}", GetGpioEndpoint).Methods("GET")
 	router.HandleFunc("/GPIO/{number}", ModifyGpioEndpoint).Methods("POST")
