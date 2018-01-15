@@ -15,7 +15,7 @@ import (
 
 // app config types
 
-const localFilePath = "/Users/serge/Downloads/files"
+const localFilePath = "/mnt/usb"
 const urlPrefix = "http://192.168.1.254:80"
 const webserverPath = "YICARCAM/MOVIE_S"
 
@@ -66,6 +66,8 @@ func processResponse(file io.Reader) {
 
 	hrefRegexp, _ := regexp.Compile("del=1")
 
+	lastFileProcessed := ""
+
 	var f func(*html.Node)
 
 	f = func(n *html.Node) {
@@ -82,6 +84,7 @@ func processResponse(file io.Reader) {
 								cameraFile := elem2[0]
 								fmt.Println("HTML parser: processing " + cameraFile)
 								downloadFile(cameraFile)
+								lastFileProcessed = cameraFile
 							}
 						}
 					}
@@ -92,7 +95,21 @@ func processResponse(file io.Reader) {
 			f(c)
 		}
 	}
+
+	// enter the recursion
 	f(doc)
+
+	// dirty hack - remove last processed file, since
+	// it's most likely incomplete (camera is still writing into it)
+	if len(lastFileProcessed) > 0 {
+		lastFileProcessedPath := filepath.Join(localFilePath, lastFileProcessed)
+		if _, err := os.Stat(lastFileProcessedPath); err == nil {
+			fmt.Println("Dirty hack - removing last file: " + lastFileProcessed)
+			if err := os.Remove(lastFileProcessedPath); err != nil {
+				fmt.Println("Error removing last file: ", err)
+			}
+		}
+	}
 }
 
 func getResponseFromHttp() {
