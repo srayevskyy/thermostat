@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"golang.org/x/net/html"
 	"io"
 	"log"
@@ -22,38 +21,36 @@ const webserverPath = "YICARCAM/MOVIE_S"
 func downloadFromUrl(url string, targetDirectory string) {
 	tokens := strings.Split(url, "/")
 	fileName := tokens[len(tokens)-1]
-	fmt.Println("Downloading", url, "to", filepath.Join(targetDirectory, fileName))
+	log.Println("Downloading", url, "to", filepath.Join(targetDirectory, fileName))
 
 	// TODO: check file existence first with io.IsExist
 	output, err := os.Create(filepath.Join(targetDirectory, fileName))
 	if err != nil {
-		fmt.Println("Error while creating", fileName, "-", err)
+		log.Println("Error while creating", fileName, "-", err)
 		return
 	}
 	defer output.Close()
 
 	response, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Error while downloading", url, "-", err)
+		log.Println("Error while downloading", url, "-", err)
 		return
 	}
 	defer response.Body.Close()
 
 	n, err := io.Copy(output, response.Body)
 	if err != nil {
-		fmt.Println("Error while downloading", url, "-", err)
+		log.Println("Error while downloading", url, "-", err)
 		return
 	}
 
-	fmt.Println(n, "bytes downloaded.")
+	log.Println(n, "bytes downloaded.")
 }
 
 func downloadFile(cameraFile string) {
 	if _, err := os.Stat(path.Join(localFilePath, cameraFile)); os.IsNotExist(err) {
 		url := urlPrefix + "/" + webserverPath + "/" + cameraFile
 		downloadFromUrl(url, localFilePath)
-	} else {
-		fmt.Println("File " + cameraFile + " already downloaded, nothing to do")
 	}
 }
 
@@ -72,17 +69,17 @@ func processResponse(file io.Reader) {
 
 	f = func(n *html.Node) {
 		if /*n.Type == html.ElementNode &&*/ n.Data == "a" {
-			// fmt.Print(n.Data)
+			// log.Print(n.Data)
 			for _, attr := range n.Attr {
 				if attr.Key == "href" {
 					if hrefRegexp.MatchString(attr.Val) {
-						//fmt.Println(attr.Val)
+						//log.Println(attr.Val)
 						elem := strings.Split(attr.Val, "/")
 						if len(elem) >= 3 {
 							elem2 := strings.Split(elem[3], "?")
 							if len(elem2) >= 2 {
 								cameraFile := elem2[0]
-								fmt.Println("HTML parser: processing " + cameraFile)
+								// log.Println("HTML parser: processing " + cameraFile)
 								downloadFile(cameraFile)
 								lastFileProcessed = cameraFile
 							}
@@ -104,9 +101,9 @@ func processResponse(file io.Reader) {
 	if len(lastFileProcessed) > 0 {
 		lastFileProcessedPath := filepath.Join(localFilePath, lastFileProcessed)
 		if _, err := os.Stat(lastFileProcessedPath); err == nil {
-			fmt.Println("Dirty hack - removing last file: " + lastFileProcessed)
+			log.Println("Dirty hack - removing last file: " + lastFileProcessed)
 			if err := os.Remove(lastFileProcessedPath); err != nil {
-				fmt.Println("Error removing last file: ", err)
+				log.Fatal("Error removing last file: ", err)
 			}
 		}
 	}

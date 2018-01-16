@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOGDATEFORMAT='+%Y-%m-%d %H:%M:%S %p'
+LOGDATEFORMAT='+%Y-%m-%d %H:%M:%S'
 
 if ps axu | grep --silent "[p]izero-camera-downloader.go"; then
   echo "`date \"${LOGDATEFORMAT}\"` INFO [${0}] downloader already running, exiting"
@@ -13,4 +13,4 @@ killall -q pizero-camera-downloader
 
 export PATH=$PATH:/usr/local/go/bin
 
-nohup go run pizero-camera-downloader.go >& pizero-camera-downloader.log &
+nohup go run pizero-camera-downloader.go >> pizero-camera-downloader.log 2>&1 &
