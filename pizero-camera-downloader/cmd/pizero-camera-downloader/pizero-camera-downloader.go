@@ -1,69 +1,80 @@
 package main
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"golang.org/x/net/html"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
-
-// app config types
 
 const localFilePath = "/mnt/usb"
 const urlPrefix = "http://192.168.1.254:80"
 const webserverPath = "YICARCAM/MOVIE_S"
 
-func downloadFromUrl(url string, targetDirectory string) {
+func downloadFromUrl(url string, targetDirectory string, failIfTargetExists bool, cleanupFailedDownload bool) (int64, error) {
+
 	tokens := strings.Split(url, "/")
 	fileName := tokens[len(tokens)-1]
-	log.Println("Downloading", url, "to", filepath.Join(targetDirectory, fileName))
+	filePath := filepath.Join(targetDirectory, fileName)
 
-	// TODO: check file existence first with io.IsExist
-	output, err := os.Create(filepath.Join(targetDirectory, fileName))
-	if err != nil {
-		log.Println("Error while creating", fileName, "-", err)
-		return
+	//log.Println("Downloading", url, "to", filePath)
+
+	if _, err := os.Stat(filePath); (err == nil) && failIfTargetExists {
+		return 0, errors.New(fmt.Sprintf("Error: file exists (%s), cannot proceed", filePath))
 	}
-	defer output.Close()
 
 	response, err := http.Get(url)
 	if err != nil {
-		log.Println("Error while downloading", url, "-", err)
-		return
+		return 0, errors.New(fmt.Sprintf("Error while accessing URL %s - %s", url, err))
 	}
 	defer response.Body.Close()
 
+	output, err := os.Create(filePath)
+	if err != nil {
+		return 0, errors.New(fmt.Sprintf("Error while creating local file %s - %s", fileName, err))
+	}
+	defer output.Close()
+
 	n, err := io.Copy(output, response.Body)
 	if err != nil {
-		log.Println("Error while downloading", url, "-", err)
-		return
+		if cleanupFailedDownload {
+			os.Remove(filePath)
+		}
+		return 0, errors.New(fmt.Sprintf("Error while downloading from URL %s - %s", url, err))
+	} else {
+		if n == 128 {
+			// TODO: check if file created has "<head><title>Page Not found</title></head>"
+			os.Remove(filePath)
+			return 0, errors.New(fmt.Sprintf("Error while downloading from URL %s - %s", url, err))
+		}
 	}
 
-	log.Println(n, "bytes downloaded.")
+	return n, nil
+
 }
 
-func downloadFile(cameraFile string) {
-	if _, err := os.Stat(path.Join(localFilePath, cameraFile)); os.IsNotExist(err) {
-		url := urlPrefix + "/" + webserverPath + "/" + cameraFile
-		downloadFromUrl(url, localFilePath)
-	}
-}
+func processResponse(file []byte) {
 
-func processResponse(file io.Reader) {
-	doc, err := html.Parse(file)
+	var (
+		fileList []string
+	)
+
+	doc, err := html.Parse(bytes.NewReader(file))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	hrefRegexp, _ := regexp.Compile("del=1")
-
-	lastFileProcessed := ""
 
 	var f func(*html.Node)
 
@@ -80,8 +91,8 @@ func processResponse(file io.Reader) {
 							if len(elem2) >= 2 {
 								cameraFile := elem2[0]
 								// log.Println("HTML parser: processing " + cameraFile)
-								downloadFile(cameraFile)
-								lastFileProcessed = cameraFile
+								fileList = append(fileList, cameraFile)
+								// downloadFile(cameraFile)
 							}
 						}
 					}
@@ -96,27 +107,27 @@ func processResponse(file io.Reader) {
 	// enter the recursion
 	f(doc)
 
-	// dirty hack - remove last processed file, since
-	// it's most likely incomplete (camera is still writing into it)
-	if len(lastFileProcessed) > 0 {
-		lastFileProcessedPath := filepath.Join(localFilePath, lastFileProcessed)
-		if _, err := os.Stat(lastFileProcessedPath); err == nil {
-			log.Println("Dirty hack - removing last file: " + lastFileProcessed)
-			if err := os.Remove(lastFileProcessedPath); err != nil {
-				log.Fatal("Error removing last file: ", err)
-			}
+	sort.Strings(fileList)
+
+	for _, fileName := range fileList[0 : len(fileList)-1] {
+		url := urlPrefix + "/" + webserverPath + "/" + fileName
+		_, err := downloadFromUrl(url, localFilePath, true, true)
+		if (err != nil) && (strings.HasPrefix(err.Error(), "Error: file exists")) {
+			log.Println(err)
 		}
 	}
+
 }
 
-func getResponseFromHttp() {
+func getResponseFromHttp() []byte {
 
 	var (
-		err    error
-		url    string
-		req    *http.Request
-		resp   *http.Response
-		client *http.Client
+		err      error
+		url      string
+		req      *http.Request
+		resp     *http.Response
+		client   *http.Client
+		respBody []byte
 	)
 
 	url = urlPrefix + "/" + webserverPath
@@ -125,50 +136,67 @@ func getResponseFromHttp() {
 
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
-		return
 	}
 
 	client = &http.Client{}
 
 	resp, err = client.Do(req)
+	defer resp.Body.Close()
+
 	if err != nil {
 		log.Fatal("Error sending HTTP request via client: ", err)
 	}
 
-	defer resp.Body.Close()
+	respBody, _ = ioutil.ReadAll(resp.Body)
 
-	processResponse(resp.Body)
+	return respBody
 
 }
 
-func getResponseFromFile() {
+func getResponseFromFile() []byte {
+
 	var (
-		err error
+		err      error
+		filePath string
+		currdir  string
+		respBody []byte
 	)
 
-	file, err := os.Open("../tests/fixtures/index.html")
+	currdir, _ = os.Getwd()
+
+	filePath = filepath.Join(currdir, "tests", "fixtures", "index.html")
+
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Fatalf("Error: json response file does not exist: %s", filePath)
+	}
+
+	respBody, err = ioutil.ReadFile(filePath)
 
 	if err != nil {
 		log.Fatal("File error: ", err)
 	}
 
-	defer file.Close()
-
-	processResponse(file)
+	return respBody
 
 }
 
 func getFileList() {
+
+	var (
+		FileListResponseRaw []byte
+	)
 
 	// TODO: remove me
 	const readFromFile = false
 
 	// callSecureHttpService(&appConfig)
 	if readFromFile {
-		getResponseFromFile()
+		FileListResponseRaw = getResponseFromFile()
 	} else {
-		getResponseFromHttp()
+		FileListResponseRaw = getResponseFromHttp()
 	}
+
+	processResponse(FileListResponseRaw)
 
 }
 

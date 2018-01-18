@@ -3,3 +3,5 @@
 .DS_Store
 .vagrant
 *-raspbian-stretch-*.*
+glide.lock
+vendor/

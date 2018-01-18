@@ -1,0 +1,6 @@
+package: github.com/srayevskyy/thermostat/pizero-camera-downloader
+
+import:
+
+- package: golang.org/x/net/html
+  version: master
