@@ -67,11 +67,11 @@ source ~/.bashrc
 rm -fv go1.10.linux-armv6l.tar.gz
 ```
 #### Create directory for source code
-`mkdir ~/src`
+`mkdir ~/go/src/github.com/srayevskyy`
 
 #### Install supplementary library WiringPi ('gpio' shell command)
 ```
-cd ~/src
+cd ~/go/src/github.com/srayevskyy
 git clone https://github.com/WiringPi/WiringPi
 cd ~/src/WiringPi/
 ./build
