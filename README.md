@@ -55,7 +55,7 @@ cat ~/.ssh/id_rsa.pub | ssh pi@<hostname> 'cat - >> ~/.ssh/authorized_keys; chmo
 
 ```
 sudo apt-get update && sudo apt-get -y upgrade
-sudo apt-get install -y git i2c-tools libjpeg-dev python-dev python-smbus python-pip
+sudo apt-get install -y git i2c-tools golang-glide libjpeg-dev python-dev python-smbus python-pip
 cd /tmp
 wget https://storage.googleapis.com/golang/go1.10.linux-armv6l.tar.gz
 sudo tar -C /usr/local -xvf go1.10.linux-armv6l.tar.gz
