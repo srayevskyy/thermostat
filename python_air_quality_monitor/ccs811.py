@@ -23,39 +23,51 @@ def get_ip_address(ifname):
         struct.pack('256s', ifname[:15])
     )[20:24])
 
-co2Value = 0
-tvocValue = 0
-tempValue = 0
 
-ccs = Adafruit_CCS811()
+def get_sensor_measurements():
+    co2Value = 0
+    tvocValue = 0
+    tempValue = 0
 
-while not ccs.available():
-    pass
+    ccs = Adafruit_CCS811()
 
-temp = ccs.calculateTemperature()
-ccs.tempOffset = temp - 25.0
+    while not ccs.available():
+        pass
 
-if ccs.available():
-    while (co2Value == 0):
-        tempValue = ccs.calculateTemperature()
-        if not ccs.readData():
-            co2Value = ccs.geteCO2()
-            tvocValue = ccs.getTVOC()
-        sleep(1)
+    temp = ccs.calculateTemperature()
+    ccs.tempOffset = temp - 25.0
 
-disp = Adafruit_SSD1306.SSD1306_128_64(rst=24, i2c_bus=0)
-disp.begin()
-disp.clear()
-disp.display()
-image = Image.new('1', (disp.width, disp.height))
-font = ImageFont.truetype('../fonts/red_alert.ttf', 14)
-draw = ImageDraw.Draw(image)
-draw.text((0, 0), "CO2: {} TVOC: {}".format(
-    co2Value, tvocValue), font=font, fill=255)
-draw.text((0, 16), "Temp: {} C".format(tempValue), font=font, fill=255)
-draw.text((0, 32), "Last: {}".format(
-    datetime.datetime.today().strftime("%b, %d %H:%M:%S")), font=font, fill=255)
-draw.text((0, 48), "IP: {}".format(
-    get_ip_address('wlan0')), font=font, fill=255)
-disp.image(image)
-disp.display()
+    if ccs.available():
+        while (co2Value == 0):
+            tempValue = ccs.calculateTemperature()
+            if not ccs.readData():
+                co2Value = ccs.geteCO2()
+                tvocValue = ccs.getTVOC()
+            sleep(1)
+
+    return (co2Value, tvocValue, tempValue)
+
+def display_sensor_values():
+    co2Value, tvocValue, tempValue = get_sensor_measurements()
+    disp = Adafruit_SSD1306.SSD1306_128_64(rst=24, i2c_bus=0)
+    disp.begin()
+    disp.clear()
+    disp.display()
+    image = Image.new('1', (disp.width, disp.height))
+    font = ImageFont.truetype('../fonts/red_alert.ttf', 14)
+    draw = ImageDraw.Draw(image)
+    draw.text((0, 0), "CO2: {} TVOC: {}".format(
+        co2Value, tvocValue), font=font, fill=255)
+    draw.text((0, 16), "Temp: {} C".format(tempValue), font=font, fill=255)
+    draw.text((0, 32), "Last: {}".format(
+        datetime.datetime.today().strftime("%b, %d %H:%M:%S")), font=font, fill=255)
+    draw.text((0, 48), "IP: {}".format(
+        get_ip_address('wlan0')), font=font, fill=255)
+    disp.image(image)
+    disp.display()
+
+def main():
+    display_sensor_values()
+
+if __name__ == "__main__":
+    main()
