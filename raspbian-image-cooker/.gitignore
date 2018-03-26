@@ -1,1 +1,3 @@
 z_call_do_all_mac.sh
+images/*
+scripts/osx/z_call_do_all_mac*.sh
