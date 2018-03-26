@@ -8,11 +8,11 @@ import datetime
 import socket
 import fcntl
 import struct
+import time
 
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
-from time import sleep
 
 
 def get_ip_address(ifname):
@@ -43,7 +43,7 @@ def get_sensor_measurements():
             if not ccs.readData():
                 co2Value = ccs.geteCO2()
                 tvocValue = ccs.getTVOC()
-            sleep(1)
+            time.sleep(1)
 
     return (co2Value, tvocValue, tempValue)
 
