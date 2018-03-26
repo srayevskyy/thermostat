@@ -103,12 +103,12 @@ class SensorValueByType(Resource):
         global co2Value, tvocValue, tempValue, lastTimeSensorRead
         if valueType.upper() == 'CO2':
             result = {
-                'CO2': co2Value, 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
+                'co2': co2Value, 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         elif valueType.upper() == 'TVOC':
-            result = {'TVOC': tvocValue,
+            result = {'tvoc': tvocValue,
                       'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         elif valueType.upper() == 'TEMP':
-            result = {'Temp': round(
+            result = {'temp': round(
                 tempValue, 1), 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         return jsonify(result)
 
@@ -116,7 +116,7 @@ class SensorValueByType(Resource):
 class SensorValues(Resource):
     def get(self):
         global co2Value, tvocValue, tempValue, lastTimeSensorRead
-        result = {'CO2': co2Value, 'TVOC': tvocValue, 'Temp': round(
+        result = {'co2': co2Value, 'tvoc': tvocValue, 'temp': round(
             tempValue, 1), 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         return jsonify(result)
 
