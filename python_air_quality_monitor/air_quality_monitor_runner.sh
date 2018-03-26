@@ -6,7 +6,6 @@ if ps axu | grep --silent "[c]cs811.py"; then
 fi
 
 cd /home/pi/go/src/github.com/srayevskyy/thermostat/python_air_quality_monitor
-
-sudo python ccs811.py
-
+source ./venv/bin/activate
+python ./ccs811.py
 
