@@ -85,13 +85,13 @@ class Config(object):
             'id': 'read_sensor_values',
             'func': read_sensor_values,
             'trigger': 'interval',
-            'seconds': 60
+            'seconds': 20
         },
         {
             'id': 'display_sensor_values',
             'func': display_sensor_values,
             'trigger': 'interval',
-            'seconds': 60
+            'seconds': 30
         },
     ]
 
