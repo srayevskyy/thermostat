@@ -91,7 +91,7 @@ class Config(object):
             'id': 'display_sensor_values',
             'func': display_sensor_values,
             'trigger': 'interval',
-            'seconds': 20
+            'seconds': 60
         },
     ]
 
