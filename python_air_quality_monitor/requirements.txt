@@ -7,3 +7,4 @@ Adafruit_GPIO
 Adafruit_SSD1306
 Pillow
 RPi.GPIO
+flask_apscheduler
