@@ -24,28 +24,28 @@ metadata {
 
     tiles(scale: 2) {
         valueTile("co2Label", "device.label.co2", width: 2, height: 2) {
-            state "default", label: 'co2'
+            state "default", label: 'CO2'
         }
         valueTile("co2", "device.co2", width: 3, height: 2) {
             state "default", label: '${currentValue} PPM'
         }
         valueTile("tvocLabel", "device.label.tvoc", width: 2, height: 2) {
-            state "default", label: 'tvoc'
+            state "default", label: 'TVOC'
         }
         valueTile("tvoc", "device.tvoc", width: 3, height: 2) {
-            state "default", label: '${currentValue}\n'
+            state "default", label: '${currentValue}'
         }
         valueTile("tempLabel", "device.label.temp", width: 2, height: 2) {
-            state "default", label: 'temp'
+            state "default", label: 'Temp'
         }
         valueTile("temp", "device.temp", width: 3, height: 2) {
-            state "default", label: '${currentValue} C\n'
+            state "default", label: '${currentValue} C'
         }
         valueTile("lastTimeSensorReadLabel", "device.label.lastTimeSensorRead", width: 3, height: 2) {
             state "default", label: 'Last time sensor read'
         }
         valueTile("lastTimeSensorRead", "device.lastTimeSensorRead", width: 2, height: 2) {
-            state "default", label: '${currentValue}\n'
+            state "default", label: '${currentValue}'
         }
         standardTile("refresh", "device.refresh", inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
             state "default", action: "refresh.refresh", icon: "st.secondary.refresh"
