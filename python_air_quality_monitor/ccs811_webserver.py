@@ -38,12 +38,13 @@ def get_sensor_measurements():
 class SensorValueByType(Resource):
     def get(self, valueType):
         co2Value, tvocValue, tempValue = get_sensor_measurements()
+        timeNow = datetime.datetime.today().strftime("%b, %d %H:%M:%S")
         if valueType.upper() == 'CO2':
-            result = {'CO2': co2Value}
+            result = {'CO2': co2Value, 'Time': timeNow}
         elif valueType.upper() == 'TVOC':
-            result = {'TVOC': tvocValue}
+            result = {'TVOC': tvocValue, 'Time': timeNow}
         elif valueType.upper() == 'TEMP':
-            result = {'Temp': round(tempValue, 1)}
+            result = {'Temp': round(tempValue, 1), 'Time': timeNow}
         return jsonify(result)
 
 
