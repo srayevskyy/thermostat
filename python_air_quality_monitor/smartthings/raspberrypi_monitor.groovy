@@ -23,36 +23,35 @@ metadata {
     }
 
     tiles(scale: 2) {
-        valueTile("co2Label", "device.label.co2", width: 1, height: 1) {
+        valueTile("co2Label", "device.label.co2", width: 2, height: 2) {
             state "default", label: 'co2'
         }
-        valueTile("co2", "device.co2", width: 2, height: 1) {
+        valueTile("co2", "device.co2", width: 3, height: 2) {
             state "default", label: '${currentValue} PPM'
         }
-        valueTile("tvocLabel", "device.label.tvoc", width: 1, height: 1) {
+        valueTile("tvocLabel", "device.label.tvoc", width: 2, height: 2) {
             state "default", label: 'tvoc'
         }
-        valueTile("tvoc", "device.tvoc", width: 2, height: 1) {
+        valueTile("tvoc", "device.tvoc", width: 3, height: 2) {
             state "default", label: '${currentValue}\n'
         }
-        valueTile("tempLabel", "device.label.temp", width: 1, height: 1) {
+        valueTile("tempLabel", "device.label.temp", width: 2, height: 2) {
             state "default", label: 'temp'
         }
-        valueTile("temp", "device.temp", width: 2, height: 1) {
+        valueTile("temp", "device.temp", width: 3, height: 2) {
             state "default", label: '${currentValue} C\n'
         }
-        valueTile("lastTimeSensorReadLabel", "device.label.lastTimeSensorRead", width: 3, height: 1) {
-            state "default", label: 'lastTimeSensorRead'
+        valueTile("lastTimeSensorReadLabel", "device.label.lastTimeSensorRead", width: 3, height: 2) {
+            state "default", label: 'Last time sensor read'
         }
-        valueTile("lastTimeSensorRead", "device.lastTimeSensorRead", width: 2, height: 1) {
+        valueTile("lastTimeSensorRead", "device.lastTimeSensorRead", width: 2, height: 2) {
             state "default", label: '${currentValue}\n'
         }
-
         standardTile("refresh", "device.refresh", inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
             state "default", action: "refresh.refresh", icon: "st.secondary.refresh"
         }
 
-        main "co2Label"
+        main "co2"
 
         details(["co2Label", "co2", "tvocLabel", "tvoc", "tempLabel", "temp", "lastTimeSensorReadLabel", "lastTimeSensorRead", "refresh"])
     }
