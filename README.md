@@ -91,7 +91,7 @@ sudo python setup.py install
 #### Clone thermostat control project
 
 ```
-cd ~/src
+cd cd ~/go/src/github.com/srayevskyy/
 git clone https://github.com/srayevskyy/thermostat
 ```
 
