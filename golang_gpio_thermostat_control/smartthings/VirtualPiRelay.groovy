@@ -15,6 +15,8 @@
  */
 
 preferences {
+    input("timeStart", "string", title: "Time ON (start)", description: "08:00", defaultValue: "08:00", required: true, displayDuringSetup: true)   
+    input("timeEnd", "string", title: "Time ON (end)", description: "02:00", defaultValue: "02:00", required: true, displayDuringSetup: true)   
     input("ip", "string", title: "IP Address", description: "192.168.86.226", defaultValue: "192.168.86.226", required: true, displayDuringSetup: true)
     input("port", "string", title: "Port", description: "8001", defaultValue: "8001", required: true, displayDuringSetup: true)
     input("gpioPort", "string", title: "GPIO Port", description: "21", defaultValue: "21", required: true, displayDuringSetup: true)
@@ -26,8 +28,11 @@ metadata {
         capability "Refresh"
         capability "Polling"
 
-        attribute 'timeStart', 'string'
-        attribute 'timeEnd', 'string'
+        attribute 'timeStartAttr', 'string'
+        attribute 'timeEndAttr', 'string'
+        attribute 'ipAttr', 'string'        
+        attribute 'portAttr', 'string'        
+        attribute 'gpioPortAttr', 'string'        
 
         command "changeSwitchState", ["string"]
         command "poll"
@@ -49,36 +54,53 @@ metadata {
         }
 
         valueTile("timeStartLabel", "device.label.timeStart", width: 2, height: 2) {
-            state "default", label: 'Time Start'
+            state "default", label: 'Time ON (start)'
         }
 
-        valueTile("timeStart", "device.timeStart", width: 3, height: 2) {
+        valueTile("timeStartAttr", "device.timeStartAttr", width: 3, height: 2) {
             state "default", label: '${currentValue}'
         }
 
         valueTile("timeEndLabel", "device.label.timeEnd", width: 2, height: 2) {
-            state "default", label: 'Time End'
+            state "default", label: 'Time ON (end)'
         }
 
-        valueTile("timeEnd", "device.timeEnd", decoration: "flat", width: 3, height: 2) {
+        valueTile("timeEndAttr", "device.timeEndAttr", decoration: "flat", width: 3, height: 2) {
+            state "default", label:'${currentValue}'
+        }
+
+        valueTile("ipLabel", "device.label.ip", width: 2, height: 1) {
+            state "default", label: 'ip'
+        }
+
+        valueTile("ipAttr", "device.ipAttr", decoration: "flat", width: 3, height: 1) {
+            state "default", label:'${currentValue}'
+        }
+
+        valueTile("portAttrLabel", "device.label.port", width: 2, height: 1) {
+            state "default", label: 'port'
+        }
+
+        valueTile("portAttr", "device.portAttr", decoration: "flat", width: 3, height: 1) {
+            state "default", label:'${currentValue}'
+        }
+
+        valueTile("gpioPortAttrLabel", "device.label.gpioPort", width: 2, height: 1) {
+            state "default", label: 'GPIO Port'
+        }
+
+        valueTile("gpioPortAttr", "device.gpioPortAttr", decoration: "flat", width: 3, height: 1) {
             state "default", label:'${currentValue}'
         }
 
         main('switch')
-        details(['switch', 'refresh', 'timeStartLabel', 'timeStart', 'timeEndLabel', 'timeEnd'])
+        details(['switch', 'refresh', 'timeStartLabel', 'timeStartAttr', 'timeEndLabel', 'timeEndAttr', 'ipLabel', 'ipAttr', 'portAttrLabel', 'portAttr', 'gpioPortAttrLabel', 'gpioPortAttr'])
 
     }
 }
 
 // parse events into attributes
 def parse(description) {
-    //log.debug "Virtual siwtch parsing '${description}'"
-
-    //def evt1 = createEvent(name: "timeStart", value: '')
-    //def evt2 = createEvent(name: "timeEnd", value: '')
-    
-    //return [evt1, evt2]
-
     log.debug "Parsing '${description?.json}'"
     def msg = parseLanMessage(description?.body)
     log.debug "Msg: '${msg}'"
@@ -86,11 +108,22 @@ def parse(description) {
     log.debug "JSON: '${json}'"
 
     if (json.containsKey("timestart")) {
-        sendEvent(name: "timeStart", value: json.timestart)
+        sendEvent(name: "timeStartAttr", value: json.timestart)
     }
     if (json.containsKey("timeend")) {
-        sendEvent(name: "timeEnd", value: json.timeend)
+        sendEvent(name: "timeEndAttr", value: json.timeend)
     }
+    if (json.containsKey("state")) {
+        //def lastState = device.currentValue("switch")
+        if (json.state == "1") {
+            sendEvent(name: "switch", value: "on")
+        } else {
+            sendEvent(name: "switch", value: "off")
+        }
+    }
+    sendEvent(name: "ipAttr", value: ip)
+    sendEvent(name: "portAttr", value: port)
+    sendEvent(name: "gpioPortAttr", value: gpioPort)
 }
 
 // handle commands
@@ -103,31 +136,6 @@ def refresh() {
     log.debug "Executing 'refresh'"
     getPiInfo()
 }
-
-/*
-def poll() {
-    log.debug "Executing 'poll'"
-
-    def timeStartValue = device.currentValue('timeStart')
-
-    log.debug "device.currentValue(timeStart): " + device.currentValue("timeStart")
-    log.debug "device.currentValue(timeEnd): " + device.currentValue("timeEnd")
-
-    if (timeStartValue) {
-        log.debug "From device handler: Executing 'ON', timeStart: " + timeStartValue.value
-    } else {
-        log.debug "From device handler: crap, timeStartValue is null"
-    }
-
-    def lastState = device.currentValue("switch")
-    sendEvent(name: "switch", value: device.deviceNetworkId + ".refresh")
-    sendEvent(name: "switch", value: lastState)
-}
-
-def refresh() {
-    poll()
-}
-*/
 
 def on() {
     log.debug "Executing 'on'"
@@ -204,5 +212,26 @@ def sync(ip, port) {
     def ipHex = convertIPToHex(ip)
     def portHex = convertPortToHex(port)
     device.deviceNetworkId = "${ipHex}:${portHex}"
+}
+
+def installed() {
+    log.debug "installed()"
+    //configure()
+}
+
+def updated() {
+    log.debug "updated()"
+    //!!! this one is celled after 'settings' button
+    //configure()
+}
+
+def configure(){
+    log.debug "configure()"
+    //return postAction("/status")
+}
+
+def ping() {
+    log.debug "ping()"
+    //postAction("/status")
 }
 
