@@ -1,0 +1,12 @@
+# Install from scratch
+
+sudo apt-get update && sudo apt-get -y upgrade
+sudo apt-get -y install git mc python-pip libjpeg-dev i2c-tools
+echo 'pi:changeMe' | sudo chpasswd
+pip install virtualenv
+mkdir /home/pi/src
+git clone https://github.com/srayevskyy/thermostat /home/pi/src/thermostat
+cd /home/pi/src/thermostat/python_air_quality_monitor
+/home/pi/.local/bin/virtualenv venv
+source ./venv/bin/activate
+pip install -r requirements.txt

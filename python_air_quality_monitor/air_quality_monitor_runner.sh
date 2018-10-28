@@ -9,7 +9,7 @@ if ps axu | grep --silent "[c]cs811_webserver.py"; then
   exit 0
 fi
 
-cd /home/pi/go/src/github.com/srayevskyy/thermostat/python_air_quality_monitor
-source venv/bin/activate
-python ccs811_webserver.py
+cd /home/pi/src/thermostat/python_air_quality_monitor
+source ./venv/bin/activate
+#python ccs811_webserver.py
 
