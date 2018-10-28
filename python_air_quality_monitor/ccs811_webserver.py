@@ -4,19 +4,20 @@ from json import dumps
 from flask_jsonpify import jsonify
 from flask_apscheduler import APScheduler
 from Adafruit_CCS811 import Adafruit_CCS811
+from datetime import datetime
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
 import time
-import datetime
 import socket
 import fcntl
 import struct
+import pytz
 
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
-TIMEFORMAT = '%b, %d %H:%M:%S'
+TIMEFORMAT = '%b, %d %H:%M:%S %Z%z'
 BIND_ADDR = '0.0.0.0'
 BIND_PORT = 5002
 I2C_BUS_OLED = 0
@@ -25,8 +26,8 @@ I2C_BUS_CCS811 = 1
 co2Value = 0
 tvocValue = 0
 tempValue = 0
-lastTimeSensorRead = datetime.datetime.today()
-
+local_tz = pytz.timezone('US/Pacific')
+lastTimeSensorRead = datetime.now(local_tz)
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -48,7 +49,7 @@ def display_sensor_values():
     draw = ImageDraw.Draw(image)
     draw.text((0, 0), "CO2: {} TVOC: {}".format(
         co2Value, tvocValue), font=font, fill=255)
-    draw.text((0, 16), "Temp: {} C".format(tempValue), font=font, fill=255)
+    draw.text((0, 16), "Temp: {} C".format(round(tempValue, 1)), font=font, fill=255)
     draw.text((0, 32), "Last: {}".format(
         lastTimeSensorRead.strftime(TIMEFORMAT)), font=font, fill=255)
     draw.text((0, 48), "IP: {}".format(
@@ -59,6 +60,8 @@ def display_sensor_values():
 
 def read_sensor_values():
     global co2Value, tvocValue, tempValue, lastTimeSensorRead
+
+    lastTimeSensorRead = datetime.now(local_tz)
 
     ccs = Adafruit_CCS811(busnum=I2C_BUS_CCS811)
 
@@ -75,8 +78,6 @@ def read_sensor_values():
                 co2Value = ccs.geteCO2()
                 tvocValue = ccs.getTVOC()
             time.sleep(1)
-
-    lastTimeSensorRead = datetime.datetime.today()
 
 
 class Config(object):
@@ -108,8 +109,7 @@ class SensorValueByType(Resource):
             result = {'tvoc': tvocValue,
                       'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         elif valueType.upper() == 'TEMP':
-            result = {'temp': round(
-                tempValue, 1), 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
+            result = {'temp': round(tempValue, 1), 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         return jsonify(result)
 
 
