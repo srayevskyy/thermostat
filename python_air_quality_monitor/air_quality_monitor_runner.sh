@@ -11,5 +11,5 @@ fi
 
 cd /home/pi/src/thermostat/python_air_quality_monitor
 source ./venv/bin/activate
-#python ccs811_webserver.py
+python ccs811_webserver.py
 
