@@ -61,7 +61,9 @@ network={
     ssid="${NEW_SSID_TO_SET}"
     psk="${NEW_PWD_TO_SET}"
     key_mgmt=WPA-PSK
+    id_str="AP1"
 }
+
 EOF
 
   else
@@ -100,7 +102,7 @@ do_all() {
     exit 1
   fi
 
-  # move image locally, because mount from shared folder does not work
+  # copy image locally, because mount from shared folder does not work
   rm -fv /tmp/${IMAGE_NAME_NO_EXT}.img
   cp -n -v /vagrant/images/${IMAGE_NAME_NO_EXT}.img /tmp/
 
@@ -110,14 +112,14 @@ do_all() {
   setup_authorized_keys "/mnt/raspbian_image_ext4" "${PUBLIC_AUTH_KEY}"
   sudo umount ${EXT4_MOUNTDIR}
 
-  mount_img "/vagrant/images/${IMAGE_NAME_NO_EXT}.img" 'fat32' 'raspbian_image'
+  mount_img "/tmp/${IMAGE_NAME_NO_EXT}.img" 'fat32' 'raspbian_image'
   FAT32_MOUNTDIR=$MOUNTDIR
   setup_wpa_supplicant_on_boot "${FAT32_MOUNTDIR}" ${SSID} ${SSID_PWD}
   enable_ssh_on_boot "${FAT32_MOUNTDIR}"
   sudo umount ${FAT32_MOUNTDIR}
 
   # move image back to shared folder
-  mv /tmp/${IMAGE_NAME_NO_EXT}.img /vagrant/images/
+  cp -v /tmp/${IMAGE_NAME_NO_EXT}.img /vagrant/images/
 }
 
 do_all "${1}" "${2}" "${3}" "${4}" "${5}"

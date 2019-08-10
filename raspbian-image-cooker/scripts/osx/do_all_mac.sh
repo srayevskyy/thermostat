@@ -28,13 +28,13 @@ fi
 
 BOOTSTRAP_ROOT="$(dirname "${0}")/../.."
 
-#vagrant destroy -f || true
-#vagrant up
+vagrant destroy -f || true
+vagrant up
 unzip_clean_image "${BOOTSTRAP_ROOT}" "${IMAGE_NAME_NO_EXT}"
 vagrant ssh -c "cd /vagrant/scripts/linux && bash ./do_all_linux.sh ${IMAGE_NAME_NO_EXT} ${HOST_NAME} ${SSID} ${SSID_PWD} '${PUBLIC_AUTH_KEY}'"
-#upload_image_to_sd "${BOOTSTRAP_ROOT}" "${IMAGE_NAME_NO_EXT}" "${DISK_NUMBER}"
-#vagrant destroy -f
-#ssh-keygen -R ${HOST_NAME}
+upload_image_to_sd "${BOOTSTRAP_ROOT}" "${IMAGE_NAME_NO_EXT}" "${DISK_NUMBER}"
+vagrant destroy -f
+ssh-keygen -R ${HOST_NAME}
 
 # sample command to ssh into raspberry
 # ssh-keygen -R ${HOST_NAME} && ssh -o "StrictHostKeyChecking=no" pi@pizero-name
