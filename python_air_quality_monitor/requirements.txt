@@ -5,7 +5,10 @@ flask-restful
 Adafruit_CCS811
 Adafruit_GPIO
 Adafruit_SSD1306
+honeywell_hpma115s0
 Pillow
 RPi.GPIO
 flask_apscheduler
 pytz
+pyserial
+

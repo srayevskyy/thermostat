@@ -7,25 +7,30 @@ from Adafruit_CCS811 import Adafruit_CCS811
 from datetime import datetime
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
+import honeywell_hpma115s0
+import serial
 import time
 import socket
 import fcntl
 import struct
 import pytz
 
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
+#from PIL import Image
+#from PIL import ImageFont
+#from PIL import ImageDraw
 
 TIMEFORMAT = '%b, %d %H:%M:%S %Z%z'
 BIND_ADDR = '0.0.0.0'
 BIND_PORT = 5002
 I2C_BUS_OLED = 0
 I2C_BUS_CCS811 = 1
+HONEYWELL_SENSOR_PORT='/dev/ttyS0'
 
-co2Value = 0
-tvocValue = 0
-tempValue = 0
+co2Value = 42
+tvocValue = 42
+tempValue = 42
+pm25Value = 42
+pm10Value = 42
 local_tz = pytz.timezone('US/Pacific')
 lastTimeSensorRead = datetime.now(local_tz)
 
@@ -58,7 +63,26 @@ def display_sensor_values():
     disp.display()
 
 
-def read_sensor_values():
+def read_Honeywell_sensor_values():
+    # Start Particle Measurement
+    ser = serial.Serial(HONEYWELL_SENSOR_PORT)
+    ser.write([0x68, 0x01, 0x01, 0x96])
+    ser.close()
+
+    time.sleep(10)
+
+    global pm25Value, pm10Value
+    hReader = honeywell_hpma115s0.Honeywell(port=HONEYWELL_SENSOR_PORT)
+    hReading = hReader.read()
+    pm25Value = hReading.pm25
+    pm10Value = hReading.pm10
+
+    # Stop Particle Measurement
+    ser = serial.Serial(HONEYWELL_SENSOR_PORT)
+    ser.write([0x68, 0x01, 0x02, 0x95])
+    ser.close()
+
+def read_CCS811_sensor_values():
     global co2Value, tvocValue, tempValue, lastTimeSensorRead
 
     lastTimeSensorRead = datetime.now(local_tz)
@@ -82,18 +106,24 @@ def read_sensor_values():
 
 class Config(object):
     JOBS = [
+#        {
+#            'id': 'read_CCS811_sensor_values',
+#            'func': read_CCS811_sensor_values,
+#            'trigger': 'interval',
+#            'seconds': 20
+#        },
         {
-            'id': 'read_sensor_values',
-            'func': read_sensor_values,
+            'id': 'read_Honeywell_sensor_values',
+            'func': read_Honeywell_sensor_values,
             'trigger': 'interval',
             'seconds': 20
         },
-        {
-            'id': 'display_sensor_values',
-            'func': display_sensor_values,
-            'trigger': 'interval',
-            'seconds': 30
-        },
+#        {
+#            'id': 'display_sensor_values',
+#            'func': display_sensor_values,
+#            'trigger': 'interval',
+#            'seconds': 30
+#        },
     ]
 
     SCHEDULER_API_ENABLED = True
@@ -115,9 +145,8 @@ class SensorValueByType(Resource):
 
 class SensorValues(Resource):
     def get(self):
-        global co2Value, tvocValue, tempValue, lastTimeSensorRead
-        result = {'co2': co2Value, 'tvoc': tvocValue, 'temp': round(
-            tempValue, 1), 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
+        global co2Value, tvocValue, tempValue, pm25Value, pm10Value, lastTimeSensorRead
+        result = {'co2': co2Value, 'tvoc': tvocValue, 'temp': round(tempValue, 1), 'pm25Value': pm25Value, 'pm10Value': pm10Value, 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         return jsonify(result)
 
 
@@ -129,8 +158,9 @@ if __name__ == '__main__':
     app.config.from_object(Config())
 
     # initial read and display of sensor values
-    read_sensor_values()
-    display_sensor_values()
+    read_Honeywell_sensor_values()
+    #read_CCS811_sensor_values()
+    #display_sensor_values()
 
     scheduler = APScheduler()
     scheduler.init_app(app)
