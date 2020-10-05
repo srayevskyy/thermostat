@@ -10,3 +10,5 @@ Pillow
 RPi.GPIO
 flask_apscheduler
 pytz
+pyserial
+

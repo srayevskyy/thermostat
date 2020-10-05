@@ -8,6 +8,7 @@ from datetime import datetime
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
 import honeywell_hpma115s0
+import serial
 import time
 import socket
 import fcntl
@@ -63,12 +64,23 @@ def display_sensor_values():
 
 
 def read_Honeywell_sensor_values():
+    # Start Particle Measurement
+    ser = serial.Serial(HONEYWELL_SENSOR_PORT)
+    ser.write([0x68, 0x01, 0x01, 0x96])
+    ser.close()
+
+    time.sleep(10)
+
     global pm25Value, pm10Value
     hReader = honeywell_hpma115s0.Honeywell(port=HONEYWELL_SENSOR_PORT)
     hReading = hReader.read()
     pm25Value = hReading.pm25
     pm10Value = hReading.pm10
 
+    # Stop Particle Measurement
+    ser = serial.Serial(HONEYWELL_SENSOR_PORT)
+    ser.write([0x68, 0x01, 0x02, 0x95])
+    ser.close()
 
 def read_CCS811_sensor_values():
     global co2Value, tvocValue, tempValue, lastTimeSensorRead
