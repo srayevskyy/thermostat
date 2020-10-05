@@ -146,7 +146,7 @@ class SensorValueByType(Resource):
 class SensorValues(Resource):
     def get(self):
         global co2Value, tvocValue, tempValue, pm25Value, pm10Value, lastTimeSensorRead
-        result = {'co2': co2Value, 'tvoc': tvocValue, 'temp': round(tempValue, 1), 'pm25Value': pm25Value, 'pm10Value': pm10Value, 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
+        result = {'co2': co2Value, 'tvoc': tvocValue, 'temp': round(tempValue, 1), 'pm25': pm25Value, 'pm10': pm10Value, 'lastTimeSensorRead': lastTimeSensorRead.strftime(TIMEFORMAT)}
         return jsonify(result)
 
 
