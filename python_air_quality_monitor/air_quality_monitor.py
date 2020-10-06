@@ -71,7 +71,7 @@ def read_Honeywell_sensor_values():
 
     time.sleep(10)
 
-    global pm25Value, pm10Value
+    global pm25Value, pm10Value, lastTimeSensorRead
     hReader = honeywell_hpma115s0.Honeywell(port=HONEYWELL_SENSOR_PORT)
     hReading = hReader.read()
     pm25Value = hReading.pm25
@@ -81,6 +81,8 @@ def read_Honeywell_sensor_values():
     ser = serial.Serial(HONEYWELL_SENSOR_PORT)
     ser.write([0x68, 0x01, 0x02, 0x95])
     ser.close()
+
+    lastTimeSensorRead = datetime.now(local_tz)
 
 def read_CCS811_sensor_values():
     global co2Value, tvocValue, tempValue, lastTimeSensorRead
@@ -116,7 +118,7 @@ class Config(object):
             'id': 'read_Honeywell_sensor_values',
             'func': read_Honeywell_sensor_values,
             'trigger': 'interval',
-            'seconds': 20
+            'seconds': 180
         },
 #        {
 #            'id': 'display_sensor_values',
